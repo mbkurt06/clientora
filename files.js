@@ -76,3 +76,14 @@ FS.copyTemplateAssets=async function(c,h){for(const asset of c.templateAssets||[
  await this.put(h,key);
  }catch(e){if(e.name==='NotFoundError'){console.warn('Missing template file:',asset.name);continue}throw e}
 }};
+
+FS.nativeFolderMarker=async function(root){
+ const name='.clientora-filemanager-id';
+ let handle;try{handle=await root.getFileHandle(name)}catch(e){if(e.name!=='NotFoundError')throw e;handle=await root.getFileHandle(name,{create:true})}
+ const file=await handle.getFile();
+ if(file.size>128)throw Error('Invalid Clientora folder marker');
+ let marker=(await file.text()).trim();
+ if(!marker){marker=crypto.randomUUID();const w=await handle.createWritable();await w.write(marker);await w.close()}
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(marker))throw Error('Invalid Clientora folder marker');
+ return marker;
+};

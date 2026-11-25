@@ -1,4 +1,4 @@
-# Clientora v0.1.6 — local-first Chrome extension
+# Clientora v0.1.7 — local-first Chrome extension
 
 **Deneysel ilk sürüm.** Gerçek veya hassas müşteri verisi girmeden önce sahte verilerle test edin. Chrome 116+ / güncel Chromium önerilir. Sunucu veya npm kurulumu gerektirmez.
 
@@ -10,6 +10,12 @@
 4. Paketlenmemiş öğe yükle (Entpackte Erweiterung laden / Load unpacked) ile klasörü seçin.
 5. Araç çubuğuna Clientora simgesini sabitleyin. Simgeye tıklayın; müşteri penceresinde simge sağ paneli açmayı dener. Alt+Shift+C ana sayfayı açar.
 6. Ayarlar > Belgeler ile yerel ana klasörün üst dizinini seçin. Clientora alt klasörünü kendisi oluşturur. Klasör erişimini gerektiğinde yeniden verin.
+
+## v0.1.7 — Dosya yöneticisi
+- Belgeler sekmesindeki Im Dateimanager öffnen düğmesi görüntülenen müşteri klasörünü veya alt klasörünü; klasörün üç nokta menüsü o klasörü işletim sisteminin dosya yöneticisinde açar.
+- Chrome tek başına yerel dosya yöneticisini açamadığı için isteğe bağlı Native Messaging köprüsü gerekir. Eklentinin diğer özellikleri bundan bağımsızdır. Python 3 ve Google Chrome gerekir. Terminal'de repo klasöründe macOS/Linux için `python3 native/install.py`, Windows için `py -3 native/install.py` çalıştırılır. Eklenti ID'si chrome://extensions veya hata penceresinden alınır. Mevcut Clientora VERİ klasörü seçilir (kaynak kod klasörü değil). macOS'ta klasör seçme penceresi açılır; diğer sistemlerde mutlak yol girilir. Yönetici yetkisi ve ağ bağlantısı gerekmez. İsteğe bağlı Chrome izni ilk kullanımda sorulur.
+- Köprü yalnızca seçilen Clientora kökü altındaki müşteri klasörlerini açar; kök eşleşmesi için `.clientora-filemanager-id` kullanılır. Dosya çalıştırmaz, ağ kullanmaz. Veri klasörü veya eklenti ID'si değişirse kurulum komutu yeniden çalıştırılır. Windows/Linux ve gerçek Chrome entegrasyonu ayrıca test edilmelidir.
+- Test: `python3 native/test_host.py` (yol sınırları, protokol).
 
 ## v0.1.6 — Dialog kapatma ve varsayılan alanlar
 - Dialog dışına tıklama ile kapatma; Escape ve Vazgeç desteği. Kaydetme devam ederken yanlışlıkla kapatma engellenir.
