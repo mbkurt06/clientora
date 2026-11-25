@@ -54,7 +54,8 @@ jobs:
           (cd native-source/native && CGO_ENABLED=0 GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o ../../build/setup-arm64 .)
           (cd native-source/native && CGO_ENABLED=0 GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../../build/setup-amd64 .)
           lipo -create build/setup-arm64 build/setup-amd64 -output "stage/Clientora Setup.app/Contents/MacOS/clientora-setup"
-          lipo -verify_arch arm64 x86_64 "stage/Clientora Setup.app/Contents/MacOS/clientora-setup"
+          lipo "stage/Clientora Setup.app/Contents/MacOS/clientora-setup" -verify_arch arm64 x86_64
+          lipo -archs "stage/Clientora Setup.app/Contents/MacOS/clientora-setup"
           cat > "stage/Clientora Setup.app/Contents/Info.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -63,6 +64,7 @@ jobs:
           codesign --force --sign - "stage/Clientora Setup.app"
           codesign --verify --strict "stage/Clientora Setup.app"
           hdiutil create -volname "Clientora Setup" -srcfolder stage -format UDZO dist/Clientora-Setup-macOS.dmg
+          hdiutil verify dist/Clientora-Setup-macOS.dmg
       - name: Build Debian setup
         if: matrix.target == 'linux'
         shell: bash
