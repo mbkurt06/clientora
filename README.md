@@ -1,16 +1,20 @@
-# Clientora v0.1.15 – Lokale Kundenverwaltung
+# Clientora v0.1.16 – Lokale Kundenverwaltung
 
 Clientora ist eine experimentelle Chrome-Erweiterung für Kundenverwaltung, Aufgaben, Termine, Erinnerungen, Dokumente und Browser-Arbeitsbereiche. Vor dem Einsatz mit echten Kundendaten bitte mit fiktiven Daten testen.
 
 ## Komplettpaket
 
-Sobald der Build erfolgreich veröffentlicht ist: [GitHub Releases](https://github.com/mbkurt06/clientora/releases) → Clientora-Komplett.zip. Das Paket enthält Chrome-Erweiterung, Setup/Windows, Setup/macOS und Setup/Linux sowie die Installationsanleitung. Alternativ gibt es ZIP-Pakete für einzelne Betriebssysteme. Go wird nur auf dem Buildserver benötigt. Der automatische GitHub-Quellcode-Download (Code → Download ZIP) enthält keine kompilierten Setup-Dateien. Testpakete sind nicht öffentlich signiert/notarisiert. Die Erweiterung muss vorerst im Entwicklermodus geladen werden; vorhandene Installationen können den Chrome-Schritt überspringen.
+Sobald der Build erfolgreich veröffentlicht ist: [GitHub Releases](https://github.com/mbkurt06/clientora/releases) → Clientora-Komplett.zip. Das Paket enthält Chrome-Erweiterung, Setup/Windows, Setup/macOS und Setup/Linux sowie die Installationsanleitung. Alternativ gibt es ZIP-Pakete für einzelne Betriebssysteme. Go wird nur auf dem Buildserver benötigt. Nach erfolgreichem Build werden die drei kompilierten Setup-Dateien zusätzlich automatisch in den Hauptbranch übernommen. Danach enthält auch Code → Download ZIP bzw. git pull origin main die fertigen Setup-Dateien. Setup/BUILD-VERSION.txt gibt an, für welche Clientora-Version die enthaltenen Installationsdateien erstellt wurden. Vor Abschluss eines neuen Builds können noch die Dateien der vorherigen Version vorhanden sein. Der native Go-Quellcode liegt im separaten Branch native-build; der Workflow verwendet einen geprüften, festgelegten Commit daraus. Testpakete sind nicht öffentlich signiert/notarisiert. Die Erweiterung muss vorerst im Entwicklermodus geladen werden; vorhandene Installationen können den Chrome-Schritt überspringen.
 
 ## Installation und Aktualisierung
 
 1. Repository herunterladen oder mit `git pull origin main` aktualisieren.
 2. `chrome://extensions` öffnen, Entwicklermodus aktivieren, den Ordner mit manifest.json als entpackte Erweiterung laden bzw. die bestehende Erweiterung aktualisieren. Nicht deinstallieren, da lokale Metadaten verloren gehen können.
 3. Clientora öffnen, einen lokalen Speicherordner auswählen und bei Bedarf eine verschlüsselte Sicherung einrichten.
+
+## Version 0.1.16
+
+- Die Build-Pipeline übernimmt die fertigen Setup-Dateien automatisch in Setup/Windows, Setup/macOS und Setup/Linux im Hauptbranch, nachdem alle Builds und Paketprüfungen erfolgreich waren. Keine lokale Go-Installation erforderlich. Der Go-Quellcode bleibt im separaten Branch native-build. Die bisherige Python-Einrichtung bleibt vorübergehend als Rückfalloption erhalten, bis die neuen Installer praktisch getestet wurden.
 
 ## Version 0.1.14
 

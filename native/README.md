@@ -1,8 +1,5 @@
-# Clientora Setup (Go)
+# Native Helper
 
-Ein Paket pro Betriebssystem, kein Python und keine Go-Installation für Endnutzer. Windows verwendet Systemdialoge über PowerShell/.NET, macOS AppleScript, Debian/Ubuntu Zenity als Paketabhängigkeit. Der Assistent kopiert den Helfer und registriert Native Messaging für die ausgewählte Erweiterungs-ID. Keine Chrome-Richtlinien, kein erzwungenes Installieren von Erweiterungen. Vorhandene Daten bleiben erhalten.
+Der Go-Quellcode wird separat im Branch native-build gepflegt. Der Build-Workflow in main verwendet den festgelegten Quellcode-Commit 368db5e570199e3e4ff91379907021b3f3936781. Bei Änderungen am Helfer muss dieser Commit im Workflow aktualisiert werden.
 
-Entwicklermodus: „Überspringen“ wählen, Erweiterungs-ID aus chrome://extensions angeben, Clientora-Datenordner wählen. Nach Web-Store-Veröffentlichung die bestätigte Store-ID beim Build mit -ldflags "-X main.storeID=..." setzen. Der Benutzer muss die Erweiterung selbst hinzufügen.
-
-Build (Entwickler): cd native && go test ./... && go build -o clientora-setup .
-GitHub Actions baut Windows-EXE, universelles macOS-DMG (Intel/Apple Silicon) und Debian-Pakete. Nach erfolgreichem Build werden die komplette ZIP-Datei und die betriebssystemspezifischen ZIP-Dateien als Vorabversion unter GitHub Releases veröffentlicht. Testpakete sind nicht öffentlich signiert/notarisiert. Für öffentliche Distribution signieren/notarisieren.
+Endnutzer benötigen Go nicht. Nach erfolgreichem Build stehen die kompilierten Setup-Dateien unter Setup/Windows, Setup/macOS und Setup/Linux zur Verfügung. Python-Dateien in diesem Ordner sind nur eine vorübergehende Rückfalloption für bisherige Entwicklerinstallationen. Testpakete sind nicht öffentlich signiert/notarisiert.

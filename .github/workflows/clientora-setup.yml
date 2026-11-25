@@ -21,22 +21,29 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout pinned native helper source
+        uses: actions/checkout@v4
+        with:
+          ref: 368db5e570199e3e4ff91379907021b3f3936781
+          path: native-source
+          sparse-checkout: native
+          persist-credentials: false
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
           cache: false
       - name: Test helper
-        working-directory: native
+        working-directory: native-source/native
         run: go test ./...
       - name: Build Windows setup
         if: matrix.target == 'windows'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist
-          Set-Location native
+          Set-Location native-source/native
           $env:CGO_ENABLED = '0'
           $env:GOARCH = 'amd64'
-          go build -trimpath -ldflags "-s -w -H windowsgui" -o ../dist/Clientora-Setup-Windows-x64.exe .
+          go build -trimpath -ldflags "-s -w -H windowsgui" -o ../../dist/Clientora-Setup-Windows-x64.exe .
       - name: Build universal macOS setup
         if: matrix.target == 'darwin'
         shell: bash
@@ -44,8 +51,8 @@ jobs:
           set -euo pipefail
           VERSION=$(node -p "require('./manifest.json').version")
           mkdir -p dist "stage/Clientora Setup.app/Contents/MacOS" build
-          (cd native && CGO_ENABLED=0 GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o ../build/setup-arm64 .)
-          (cd native && CGO_ENABLED=0 GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../build/setup-amd64 .)
+          (cd native-source/native && CGO_ENABLED=0 GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o ../../build/setup-arm64 .)
+          (cd native-source/native && CGO_ENABLED=0 GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../../build/setup-amd64 .)
           lipo -create build/setup-arm64 build/setup-amd64 -output "stage/Clientora Setup.app/Contents/MacOS/clientora-setup"
           lipo -verify_arch arm64 x86_64 "stage/Clientora Setup.app/Contents/MacOS/clientora-setup"
           cat > "stage/Clientora Setup.app/Contents/Info.plist" <<PLIST
@@ -63,7 +70,7 @@ jobs:
           set -euo pipefail
           VERSION=$(node -p "require('./manifest.json').version")
           mkdir -p dist stage/DEBIAN stage/usr/bin stage/usr/share/applications
-          (cd native && CGO_ENABLED=0 GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../stage/usr/bin/clientora-setup .)
+          (cd native-source/native && CGO_ENABLED=0 GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../../stage/usr/bin/clientora-setup .)
           printf 'Package: clientora-setup\nVersion: %s\nArchitecture: amd64\nMaintainer: Clientora\nDepends: zenity, xdg-utils\nDescription: Clientora Einrichtung und lokaler Dokumentenhelfer\n' "$VERSION" > stage/DEBIAN/control
           printf '[Desktop Entry]\nName=Clientora Setup\nExec=clientora-setup\nType=Application\nTerminal=false\nCategories=Office;\n' > stage/usr/share/applications/clientora-setup.desktop
           dpkg-deb --root-owner-group --build stage dist/Clientora-Setup-Linux-amd64.deb
@@ -114,6 +121,33 @@ jobs:
         with:
           name: Clientora-Komplett
           path: dist
+      - name: Install compiled setup files into the main branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]; then
+            echo "A newer commit exists. Refusing to publish obsolete installers."
+            exit 1
+          fi
+          mkdir -p Setup/Windows Setup/macOS Setup/Linux
+          unzip -q dist/Clientora-Komplett.zip -d extracted
+          cp extracted/Clientora/Setup/Windows/Clientora-Setup-Windows-x64.exe Setup/Windows/
+          cp extracted/Clientora/Setup/macOS/Clientora-Setup-macOS.dmg Setup/macOS/
+          cp extracted/Clientora/Setup/Linux/Clientora-Setup-Linux-amd64.deb Setup/Linux/
+          VERSION=$(node -p "require('./manifest.json').version")
+          for file in Setup/Windows/*.exe Setup/macOS/*.dmg Setup/Linux/*.deb; do
+            test -s "$file"
+          done
+          (cd Setup && sha256sum Windows/*.exe macOS/*.dmg Linux/*.deb > SHA256SUMS.txt)
+          printf '%s\n' "$VERSION" > Setup/BUILD-VERSION.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- Setup/Windows/Clientora-Setup-Windows-x64.exe Setup/macOS/Clientora-Setup-macOS.dmg Setup/Linux/Clientora-Setup-Linux-amd64.deb Setup/BUILD-VERSION.txt Setup/SHA256SUMS.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "build: include Clientora $VERSION setup packages"
+            git push origin HEAD:main
+          fi
       - name: Publish versioned test distribution
         env:
           GH_TOKEN: ${{ github.token }}
@@ -131,4 +165,4 @@ jobs:
             echo "Tag $TAG already exists; refusing to reuse it."
             exit 1
           fi
-          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "Clientora $VERSION – Testinstallation" --notes "Clientora-Komplett.zip enthält die Chrome-Erweiterung und Setup für Windows, macOS und Debian/Ubuntu. Keine Go- oder Python-Installation nötig. Chrome-Erweiterung vorerst manuell im Entwicklermodus laden. Testpakete sind nicht mit öffentlichem Herstellerzertifikat signiert/notarisiert. Reale Betriebssystem- und Chrome-Tests stehen aus."
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --target "$(git rev-parse HEAD)" --prerelease --title "Clientora $VERSION – Testinstallation" --notes "Clientora-Komplett.zip enthält die Chrome-Erweiterung und Setup für Windows, macOS und Debian/Ubuntu. Keine Go- oder Python-Installation nötig. Chrome-Erweiterung vorerst manuell im Entwicklermodus laden. Testpakete sind nicht mit öffentlichem Herstellerzertifikat signiert/notarisiert. Reale Betriebssystem- und Chrome-Tests stehen aus."
