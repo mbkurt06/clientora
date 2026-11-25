@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Clientora",
+  "version": "0.1.1",
+  "description": "Local client workspaces and case management",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "storage",
+    "tabs",
+    "sidePanel",
+    "alarms",
+    "notifications",
+    "downloads",
+    "contextMenus",
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "service_worker": "worker.js"
+  },
+  "action": {
+    "default_title": "Clientora",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "128": "icon.png"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "commands": {
+    "open-dashboard": {
+      "suggested_key": {
+        "default": "Alt+Shift+C"
+      },
+      "description": "Open Clientora"
+    }
+  }
+}
