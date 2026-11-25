@@ -1,4 +1,4 @@
-# Clientora v0.1.7 — local-first Chrome extension
+# Clientora v0.1.8 — local-first Chrome extension
 
 **Deneysel ilk sürüm.** Gerçek veya hassas müşteri verisi girmeden önce sahte verilerle test edin. Chrome 116+ / güncel Chromium önerilir. Sunucu veya npm kurulumu gerektirmez.
 
@@ -10,6 +10,12 @@
 4. Paketlenmemiş öğe yükle (Entpackte Erweiterung laden / Load unpacked) ile klasörü seçin.
 5. Araç çubuğuna Clientora simgesini sabitleyin. Simgeye tıklayın; müşteri penceresinde simge sağ paneli açmayı dener. Alt+Shift+C ana sayfayı açar.
 6. Ayarlar > Belgeler ile yerel ana klasörün üst dizinini seçin. Clientora alt klasörünü kendisi oluşturur. Klasör erişimini gerektiğinde yeniden verin.
+
+## v0.1.8 — Tek varsayılan belge klasörü
+- Yeni müşteri için yalnızca `Dokumente` otomatik oluşturulur. Yeni demo belgeleri de burada yer alır. Dosya sekmesi doğrudan Dokumente içinde açılır; ev simgesiyle müşteri kök klasörüne gidilebilir. Yükleme ve sürükle-bırak, seçili alt klasörü kullanır; kökteyken Dokumente kullanılır.
+- Clientora sağ tıklama indirmeleri, mevcut göreli indirme ayarı doğruysa Dokumente klasörüne yönlendirilir. Sıradan Chrome indirmeleri henüz otomatik eşleştirilemez.
+- Yeni hazır şablonlar ek klasör oluşturmaz; kullanıcı tanımlı şablon klasörleri ve daha önce kaydedilmiş şablon tanımları korunur. Şablon boş belgeleri gerektiğinde Dokumente/Sablonlar/<şablon-id> altına kopyalanır.
+- Eski klasörler ve belgeler silinmez, taşınmaz veya yeniden adlandırılmaz. Dosya klasörünün gerçek adı dil değişse bile sabit kalır. Yeni sürüm eski demo belgelerini yeniden üretmez.
 
 ## v0.1.7 — Dosya yöneticisi
 - Belgeler sekmesindeki Im Dateimanager öffnen düğmesi görüntülenen müşteri klasörünü veya alt klasörünü; klasörün üç nokta menüsü o klasörü işletim sisteminin dosya yöneticisinde açar.
@@ -62,7 +68,7 @@
 - Parolalı metadata dışa aktarma / geri yükleme. Belgeleri ayrıca yedekleyin. Eklentiyi kaldırmak Chrome'daki metadata ve kasa verisini kaybettirebilir; yerel klasörler kalır. Yedek parola ve kasa parolasını kaybetmeyin.
 
 ## İndirme yönlendirmesi ve oturum sınırları
-Chrome downloads API, sıradan indirmelerde kaynak sekme/pencere kimliğini vermez ve yalnızca Chrome varsayılan indirme klasörüne göre göreli hedef kabul eder. Bu sürümde **müşteri penceresinde bağlantıya sağ tıklayıp Clientora seçildiğinde** müşteri kesin olarak bilinir. `Clientora` klasörü Chrome'un gerçek indirme dizininin hemen altında ise Ayarlar'daki ilgili kutuyu işaretleyin; otomatik hedef `Clientora/Musteriler/<müşteri>/05_Indirilenler/` olur. Başka bir klasör seçilirse kayıt konumu sorulur. Normal indirmeleri Belgeler > Dosya ekle ile elle aktarın. Chrome indirme klasörüne göre konumu doğrulamadan kutuyu açmayın. Bu sürüm normal tarayıcı indirmelerini otomatik olarak müşteriye atamaz.
+Chrome downloads API, sıradan indirmelerde kaynak sekme/pencere kimliğini vermez ve yalnızca Chrome varsayılan indirme klasörüne göre göreli hedef kabul eder. Bu sürümde **müşteri penceresinde bağlantıya sağ tıklayıp Clientora seçildiğinde** müşteri kesin olarak bilinir. `Clientora` klasörü Chrome'un gerçek indirme dizininin hemen altında ise Ayarlar'daki ilgili kutuyu işaretleyin; otomatik hedef `Clientora/Musteriler/<müşteri>/Dokumente/` olur. Başka bir klasör seçilirse kayıt konumu sorulur. Normal indirmeleri Belgeler > Dosya ekle ile elle aktarın. Chrome indirme klasörüne göre konumu doğrulamadan kutuyu açmayın. Bu sürüm normal tarayıcı indirmelerini otomatik olarak müşteriye atamaz.
 
 **Çerezler, localStorage, IndexedDB ve oturumlar normal Chrome profili içinde ortaktır.** Müşteriye özgü pencere güvenlik izolasyonu değildir. Yanlış hesaba işlem yapmamak için web sitesindeki aktif kullanıcıyı mutlaka kontrol edin. Aynı siteye farklı müşterilerle eşzamanlı giriş için ayrı Chrome profilleri kullanın. Eklenti, farklı müşterilere parola önerisini kendi kasasında ayrı tutar. Parola doldurma yalnızca sağ panelden açık kullanıcı eylemiyle yapılır. Otomatik panel açma Chrome kullanıcı etkileşimi kısıtına takılabilir; araç çubuğu simgesinden açın. Tarayıcı yeniden başlarsa müşteri penceresi eşlemesini yeniden oluşturmak için müşteri detayından çalışma alanını açın.
 
