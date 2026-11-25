@@ -13,7 +13,7 @@ import (
  "strings"
 )
 const hostName = "com.clientora.filemanager"
-const helperVersion = "0.1.14"
+const helperVersion = "0.1.15"
 // Set at release build time only after the official Web Store listing exists.
 var storeID string
 var idRE = regexp.MustCompile("^[a-p]{32}$")

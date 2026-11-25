@@ -1,21 +1,23 @@
-name: Clientora setup packages
+name: Clientora complete distribution
 on:
   push:
     branches: [main]
-    paths: ['native/**', '.github/workflows/clientora-setup.yml', 'manifest.json']
+    paths: ['native/**', '.github/workflows/clientora-setup.yml', 'manifest.json', '*.js', '*.html', '*.css', 'icon.png', 'README.md', 'Setup/**']
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: clientora-distribution-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - {os: windows-latest, target: windows, arch: amd64}
-          - {os: macos-15, target: darwin, arch: arm64}
-          - {os: macos-15-intel, target: darwin, arch: amd64}
-          - {os: ubuntu-latest, target: linux, arch: amd64}
+          - {os: windows-latest, target: windows}
+          - {os: macos-15, target: darwin}
+          - {os: ubuntu-latest, target: linux}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -33,31 +35,100 @@ jobs:
           New-Item -ItemType Directory -Force dist
           Set-Location native
           $env:CGO_ENABLED = '0'
+          $env:GOARCH = 'amd64'
           go build -trimpath -ldflags "-s -w -H windowsgui" -o ../dist/Clientora-Setup-Windows-x64.exe .
-      - name: Build macOS setup DMG
+      - name: Build universal macOS setup
         if: matrix.target == 'darwin'
         shell: bash
         run: |
-          mkdir -p dist "stage/Clientora Setup.app/Contents/MacOS"
-          (cd native && CGO_ENABLED=0 GOARCH=${{ matrix.arch }} go build -trimpath -ldflags "-s -w" -o "../stage/Clientora Setup.app/Contents/MacOS/clientora-setup" .)
-          cat > "stage/Clientora Setup.app/Contents/Info.plist" <<'PLIST'
+          set -euo pipefail
+          VERSION=$(node -p "require('./manifest.json').version")
+          mkdir -p dist "stage/Clientora Setup.app/Contents/MacOS" build
+          (cd native && CGO_ENABLED=0 GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o ../build/setup-arm64 .)
+          (cd native && CGO_ENABLED=0 GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../build/setup-amd64 .)
+          lipo -create build/setup-arm64 build/setup-amd64 -output "stage/Clientora Setup.app/Contents/MacOS/clientora-setup"
+          lipo -verify_arch arm64 x86_64 "stage/Clientora Setup.app/Contents/MacOS/clientora-setup"
+          cat > "stage/Clientora Setup.app/Contents/Info.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0"><dict><key>CFBundleExecutable</key><string>clientora-setup</string><key>CFBundleIdentifier</key><string>com.clientora.setup</string><key>CFBundleName</key><string>Clientora Setup</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleVersion</key><string>0.1.14</string></dict></plist>
+          <plist version="1.0"><dict><key>CFBundleExecutable</key><string>clientora-setup</string><key>CFBundleIdentifier</key><string>com.clientora.setup</string><key>CFBundleName</key><string>Clientora Setup</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleVersion</key><string>$VERSION</string><key>CFBundleShortVersionString</key><string>$VERSION</string></dict></plist>
           PLIST
           codesign --force --sign - "stage/Clientora Setup.app"
-          hdiutil create -volname "Clientora Setup" -srcfolder stage -format UDZO "dist/Clientora-Setup-macOS-${{ matrix.arch }}.dmg"
+          codesign --verify --strict "stage/Clientora Setup.app"
+          hdiutil create -volname "Clientora Setup" -srcfolder stage -format UDZO dist/Clientora-Setup-macOS.dmg
       - name: Build Debian setup
         if: matrix.target == 'linux'
         shell: bash
         run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./manifest.json').version")
           mkdir -p dist stage/DEBIAN stage/usr/bin stage/usr/share/applications
-          (cd native && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o ../stage/usr/bin/clientora-setup .)
-          printf 'Package: clientora-setup\nVersion: 0.1.14\nArchitecture: amd64\nMaintainer: Clientora\nDepends: zenity, xdg-utils\nDescription: Clientora Einrichtung und lokaler Dokumentenhelfer\n' > stage/DEBIAN/control
+          (cd native && CGO_ENABLED=0 GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o ../stage/usr/bin/clientora-setup .)
+          printf 'Package: clientora-setup\nVersion: %s\nArchitecture: amd64\nMaintainer: Clientora\nDepends: zenity, xdg-utils\nDescription: Clientora Einrichtung und lokaler Dokumentenhelfer\n' "$VERSION" > stage/DEBIAN/control
           printf '[Desktop Entry]\nName=Clientora Setup\nExec=clientora-setup\nType=Application\nTerminal=false\nCategories=Office;\n' > stage/usr/share/applications/clientora-setup.desktop
           dpkg-deb --root-owner-group --build stage dist/Clientora-Setup-Linux-amd64.deb
       - uses: actions/upload-artifact@v4
         with:
-          name: Clientora-${{ matrix.target }}-${{ matrix.arch }}
+          name: Clientora-${{ matrix.target }}
           path: dist/*
           if-no-files-found: error
+  package:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Clientora-*
+          path: packages
+      - name: Assemble extension and all installers
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p bundle/Clientora/Chrome-Erweiterung bundle/Clientora/Setup/{Windows,macOS,Linux} dist
+          cp manifest.json app.js worker.js files.js i18n.js vault.js index.html panel.html style.css icon.png bundle/Clientora/Chrome-Erweiterung/
+          cp Setup/INSTALLATION-DE.txt bundle/Clientora/
+          cp packages/Clientora-windows/Clientora-Setup-Windows-x64.exe bundle/Clientora/Setup/Windows/
+          cp packages/Clientora-darwin/Clientora-Setup-macOS.dmg bundle/Clientora/Setup/macOS/
+          cp packages/Clientora-linux/Clientora-Setup-Linux-amd64.deb bundle/Clientora/Setup/Linux/
+          (cd bundle && zip -qr ../dist/Clientora-Komplett.zip Clientora)
+          for platform in Windows macOS Linux; do
+            (cd bundle && zip -qr "../dist/Clientora-$platform.zip" Clientora/Chrome-Erweiterung Clientora/INSTALLATION-DE.txt "Clientora/Setup/$platform")
+          done
+          (cd dist && sha256sum *.zip > SHA256SUMS.txt)
+          unzip -t dist/Clientora-Komplett.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Clientora-Komplett
+          path: dist/*
+          if-no-files-found: error
+  publish:
+    needs: package
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Clientora-Komplett
+          path: dist
+      - name: Publish versioned test distribution
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./manifest.json').version")
+          TAG="v$VERSION"
+          # Never overwrite a release or reuse a tag for a different build.
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists. Increase the manifest version before publishing another build."
+            exit 0
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists; refusing to reuse it."
+            exit 1
+          fi
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "Clientora $VERSION – Testinstallation" --notes "Clientora-Komplett.zip enthält die Chrome-Erweiterung und Setup für Windows, macOS und Debian/Ubuntu. Keine Go- oder Python-Installation nötig. Chrome-Erweiterung vorerst manuell im Entwicklermodus laden. Testpakete sind nicht mit öffentlichem Herstellerzertifikat signiert/notarisiert. Reale Betriebssystem- und Chrome-Tests stehen aus."

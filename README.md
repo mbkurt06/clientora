@@ -1,6 +1,10 @@
-# Clientora v0.1.14 – Lokale Kundenverwaltung
+# Clientora v0.1.15 – Lokale Kundenverwaltung
 
 Clientora ist eine experimentelle Chrome-Erweiterung für Kundenverwaltung, Aufgaben, Termine, Erinnerungen, Dokumente und Browser-Arbeitsbereiche. Vor dem Einsatz mit echten Kundendaten bitte mit fiktiven Daten testen.
+
+## Komplettpaket
+
+Sobald der Build erfolgreich veröffentlicht ist: [GitHub Releases](https://github.com/mbkurt06/clientora/releases) → Clientora-Komplett.zip. Das Paket enthält Chrome-Erweiterung, Setup/Windows, Setup/macOS und Setup/Linux sowie die Installationsanleitung. Alternativ gibt es ZIP-Pakete für einzelne Betriebssysteme. Go wird nur auf dem Buildserver benötigt. Der automatische GitHub-Quellcode-Download (Code → Download ZIP) enthält keine kompilierten Setup-Dateien. Testpakete sind nicht öffentlich signiert/notarisiert. Die Erweiterung muss vorerst im Entwicklermodus geladen werden; vorhandene Installationen können den Chrome-Schritt überspringen.
 
 ## Installation und Aktualisierung
 

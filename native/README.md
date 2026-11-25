@@ -5,4 +5,4 @@ Ein Paket pro Betriebssystem, kein Python und keine Go-Installation für Endnutz
 Entwicklermodus: „Überspringen“ wählen, Erweiterungs-ID aus chrome://extensions angeben, Clientora-Datenordner wählen. Nach Web-Store-Veröffentlichung die bestätigte Store-ID beim Build mit -ldflags "-X main.storeID=..." setzen. Der Benutzer muss die Erweiterung selbst hinzufügen.
 
 Build (Entwickler): cd native && go test ./... && go build -o clientora-setup .
-GitHub Actions baut Windows-EXE, macOS-DMG (Intel/Apple Silicon) und Debian-Pakete. Testpakete sind nicht öffentlich signiert/notarisiert. Für öffentliche Distribution signieren/notarisieren.
+GitHub Actions baut Windows-EXE, universelles macOS-DMG (Intel/Apple Silicon) und Debian-Pakete. Nach erfolgreichem Build werden die komplette ZIP-Datei und die betriebssystemspezifischen ZIP-Dateien als Vorabversion unter GitHub Releases veröffentlicht. Testpakete sind nicht öffentlich signiert/notarisiert. Für öffentliche Distribution signieren/notarisieren.

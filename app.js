@@ -136,7 +136,7 @@ async function nativeOpen(c,getHandle,action,entry,permission){
   if(dialog.open)dialog.close();
  }catch(e){
   if(e?.name==='AbortError')return;
-  dialog.replaceChildren(h(t('nativeSetup')),small(t('nativeHelpUpdated')),small(t('nativeError')+': '+localError(String(e.message||e))),el('label',{},t('extensionId'),el('input',{value:chrome.runtime.id,readonly:'readonly'})),b(t('setupPackages'),()=>chrome.tabs.create({url:'https://github.com/mbkurt06/clientora/actions'})),small(t('setupDevFallback')),el('code',{},'python3 native/install.py'),row(entry&&canPreview(entry.name)?b(t('browserPreview'),()=>preview(entry)):null,b(t('copyId'),async()=>{await navigator.clipboard.writeText(chrome.runtime.id);toast(t('saved'))}),b(t('cancel'),()=>dialog.close())));
+  dialog.replaceChildren(h(t('nativeSetup')),small(t('nativeHelpUpdated')),small(t('nativeError')+': '+localError(String(e.message||e))),el('label',{},t('extensionId'),el('input',{value:chrome.runtime.id,readonly:'readonly'})),b(t('setupPackages'),()=>chrome.tabs.create({url:'https://github.com/mbkurt06/clientora/releases'})),small(t('setupDevFallback')),el('code',{},'python3 native/install.py'),row(entry&&canPreview(entry.name)?b(t('browserPreview'),()=>preview(entry)):null,b(t('copyId'),async()=>{await navigator.clipboard.writeText(chrome.runtime.id);toast(t('saved'))}),b(t('cancel'),()=>dialog.close())));
   if(!dialog.open)dialog.showModal();
  }
 }

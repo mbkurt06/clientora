@@ -1,0 +1,14 @@
+CLIENTORA – TESTINSTALLATION
+
+1. ZIP-Datei vollständig entpacken. Den Ordner Chrome-Erweiterung dauerhaft speichern. Bereits installierte Erweiterungen nicht entfernen und den bisherigen Ordner nicht verschieben, damit die vorhandenen lokalen Daten erhalten bleiben.
+2. Falls Clientora noch nicht in Chrome installiert ist: chrome://extensions öffnen, Entwicklermodus einschalten, "Entpackte Erweiterung laden" wählen und den Ordner Chrome-Erweiterung auswählen.
+3. Clientora öffnen und den Datenordner auswählen, falls noch nicht verbunden.
+4. Unter Setup das passende Betriebssystem wählen:
+   Windows (x64): Clientora-Setup-Windows-x64.exe doppelklicken.
+   macOS (Apple Silicon oder Intel): Clientora-Setup-macOS.dmg öffnen, Clientora Setup starten.
+   Debian/Ubuntu (amd64): Clientora-Setup-Linux-amd64.deb mit dem Paketinstallationsprogramm installieren, danach Clientora Setup im Anwendungsmenü öffnen. Systemabhängigkeiten werden vom Paketmanager installiert.
+5. Im Assistenten Chrome-Erweiterung überspringen, vorhandene Erweiterungs-ID bestätigen bzw. kopieren und denselben Clientora-Datenordner auswählen. Die ID ist in chrome://extensions sichtbar.
+6. In Clientora ein Dokument öffnen und ggf. die Chrome-Berechtigung bestätigen.
+
+Keine Go- oder Python-Installation nötig. Keine erzwungene Erweiterungsinstallation.
+Die Testpakete sind nicht öffentlich signiert/notarisiert. Sicherheitswarnungen nicht umgehen. Vor produktivem Einsatz mit fiktiven Daten testen. Der Chrome Web Store wird später eingebunden.
