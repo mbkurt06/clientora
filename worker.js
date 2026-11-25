@@ -18,8 +18,8 @@ const norm=v=>String(v||'').trim().normalize('NFKC').toLowerCase();
 const requiredText=(v,max=300)=>{const t=String(v||'').trim();if(!t||t.length>max)throw Error('Invalid name or title');return t};
 function fieldDef(x){return {label:requiredText(x.label,100),type:fieldTypes.includes(x.type)?x.type:'text'}}
 function appendField(a,x,withValue=false){const d=fieldDef(x);let old=a.find(y=>norm(y.label)===norm(d.label));if(!old){old={id:id(),...d,...(withValue?{value:''}:{})};a.push(old)}return old}
-function normalizeTemplate(t){return {...t,fields:Array.isArray(t.fields)?t.fields:[],tasks:Array.isArray(t.tasks)?t.tasks.map(x=>typeof x==='string'?{title:x}:x):[],sites:Array.isArray(t.sites)?t.sites.map(x=>typeof x==='string'?{title:x,url:x}:x):[],documents:Array.isArray(t.documents)?t.documents:[],folders:Array.isArray(t.folders)?t.folders:[],assets:Array.isArray(t.assets)?t.assets:[]}}
-function normalizeClient(c){c.fields=Array.isArray(c.fields)?c.fields:[];c.documents=Array.isArray(c.documents)?c.documents:[];c.templateIds=Array.isArray(c.templateIds)?c.templateIds:[];c.templateAssets=Array.isArray(c.templateAssets)?c.templateAssets:[];c.folders=Array.isArray(c.folders)?c.folders:[];return c}
+function normalizeTemplate(t){return {...t,fields:Array.isArray(t.fields)?t.fields:[],tasks:Array.isArray(t.tasks)?t.tasks.map(x=>typeof x==='string'?{title:x}:x):[],sites:Array.isArray(t.sites)?t.sites.map(x=>typeof x==='string'?{title:x,url:x}:x):[],documents:Array.isArray(t.documents)?t.documents:[],folders:Array.isArray(t.folders)?t.folders:[],assets:Array.isArray(t.assets)?t.assets:[],notes:Array.isArray(t.notes)?t.notes:[],events:Array.isArray(t.events)?t.events:[],reminders:Array.isArray(t.reminders)?t.reminders:[]}}
+function normalizeClient(c){c.fields=Array.isArray(c.fields)?c.fields:[];c.documents=Array.isArray(c.documents)?c.documents:[];c.templateIds=Array.isArray(c.templateIds)?c.templateIds:[];if(!c.templateSections||typeof c.templateSections!=='object'||Array.isArray(c.templateSections))c.templateSections=Object.fromEntries(c.templateIds.map(id=>[id,['fields','tasks','documents','sites','files']]));c.templateAssets=Array.isArray(c.templateAssets)?c.templateAssets:[];c.folders=Array.isArray(c.folders)?c.folders:[];return c}
 const uiText=(l,en,de,tr)=>{if(l==='auto')l=(chrome.i18n?.getUILanguage?.()||'de').slice(0,2);return l==='en'?en:l==='tr'?tr:de};
 function builtInTemplates(language='de'){const T=(en,de,tr)=>language==='en'?en:language==='tr'?tr:de;
 const make=(id,name,fields,documents,sites,tasks,folders)=>normalizeTemplate({id,name,fields:fields.map(([label,type])=>({label,type})),documents:documents.map(title=>({title})),sites:sites.map(([title,url])=>({title,url})),tasks:tasks.map(title=>({title})),folders,assets:[]});
@@ -41,20 +41,38 @@ function addTemplateEntry(t,kind,x){
  if(kind==='fields'){appendField(t.fields,x);return}
  if(kind==='sites'){const url=requiredText(x.url,2000);if(!urlOK(url))throw Error('Invalid URL');if(!t.sites.some(y=>y.url===url))t.sites.push({title:requiredText(x.title||url),url});return}
  if(kind==='tasks'||kind==='documents'){const title=requiredText(x.title);if(!t[kind].some(y=>norm(y.title)===norm(title)))t[kind].push({title});return}
+ if(kind==='notes'){const title=requiredText(x.title);if(!t.notes.some(y=>norm(y.title)===norm(title)))t.notes.push({title,description:String(x.description||'').slice(0,5000)});return}
+ if(kind==='events'||kind==='reminders'){const title=requiredText(x.title);const days=Number(x.days??1),time=String(x.time||'09:00');if(!Number.isInteger(days)||days<0||days>3650||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))throw Error('Invalid template schedule');if(!t[kind].some(y=>norm(y.title)===norm(title)))t[kind].push({title,days,time});return}
  if(kind==='folders'){const name=requiredText(x.name,100);if(!validTemplateName(name))throw Error('Invalid folder name');if(!t.folders.includes(name))t.folders.push(name);return}
  if(kind==='assets'){const name=requiredText(x.name,170);if(!validTemplateName(name))throw Error('Invalid file name');if(!t.assets.some(y=>y.name===name))t.assets.push({name});return}
  throw Error('Invalid template item');
 }
 function validTemplateName(n){return typeof n==='string'&&n.trim()===n&&n.length>0&&n.length<180&&!/[\\/:*?"<>|\x00-\x1f]/.test(n)&&!['.','..'].includes(n)&&!/[. ]$/.test(n)&&!/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(n)}
-function applyTemplate(c,t){
- normalizeClient(c);
- for(const x of t.fields)appendField(c.fields,x,true);
- for(const x of t.tasks)if(!c.tasks.some(y=>norm(y.title)===norm(x.title)))c.tasks.push({id:id(),title:x.title,status:'todo',priority:'normal',created:Date.now()});
- for(const x of t.documents)if(!c.documents.some(y=>norm(y.title)===norm(x.title)))c.documents.push({id:id(),title:x.title,status:'missing',created:Date.now()});
- for(const x of t.sites)if(urlOK(x.url)&&!c.sites.some(y=>y.url===x.url))c.sites.push({id:id(),title:x.title,url:x.url,created:Date.now()});
- for(const n of t.folders)if(validTemplateName(n)&&!c.folders.includes(n))c.folders.push(n);
- for(const x of t.assets)if(validTemplateName(x.name)&&!c.templateAssets.some(y=>y.templateId===t.id&&y.name===x.name))c.templateAssets.push({templateId:t.id,name:x.name});
- if(!c.templateIds.includes(t.id))c.templateIds.push(t.id);
+
+const templateScopes=['fields','tasks','documents','sites','files','notes','events','reminders'];
+function applyTemplate(c,t,scope='all',baseDate){
+ normalizeClient(c);t=normalizeTemplate(t);
+ if(scope!=='all'&&!templateScopes.includes(scope))throw Error('Invalid template section');
+ const use=k=>scope==='all'||scope===k;
+ const applicable=k=>k==='files'?t.folders.length+t.assets.length>0:t[k].length>0;
+ if(scope!=='all'&&!applicable(scope))throw Error('Empty template section');
+ const scheduled=['events','reminders'].some(k=>use(k)&&t[k].length);
+ let base=null;
+ if(scheduled){if(baseDate!==undefined&&baseDate!==null&&baseDate!==''){if(!/^\d{4}-\d{2}-\d{2}$/.test(baseDate))throw Error('Invalid template schedule');base=new Date(baseDate+'T00:00:00');if(!Number.isFinite(base.getTime()))throw Error('Invalid template schedule')}else{base=new Date();base.setHours(0,0,0,0)}}
+ const makeDate=x=>{const d=new Date(base);const days=Number(x.days??1),time=String(x.time||'09:00');if(!Number.isInteger(days)||days<0||days>3650||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))throw Error('Invalid template schedule');const [h,m]=time.split(':').map(Number);d.setDate(d.getDate()+days);d.setHours(h,m,0,0);return d.getTime()};
+ const add=(k,x,fields)=>{if(!c[k].some(y=>norm(y.title)===norm(x.title)))c[k].push({id:id(),title:x.title,created:Date.now(),...fields})};
+ if(use('fields'))for(const x of t.fields)appendField(c.fields,x,true);
+ if(use('tasks'))for(const x of t.tasks)add('tasks',x,{status:'todo',priority:'normal'});
+ if(use('documents'))for(const x of t.documents)add('documents',x,{status:'missing'});
+ if(use('sites'))for(const x of t.sites)if(urlOK(x.url)&&!c.sites.some(y=>y.url===x.url))c.sites.push({id:id(),title:x.title,url:x.url,created:Date.now()});
+ if(use('files')){
+  for(const n of t.folders)if(validTemplateName(n)&&!c.folders.includes(n))c.folders.push(n);
+  for(const x of t.assets)if(validTemplateName(x.name)&&!c.templateAssets.some(y=>y.templateId===t.id&&y.name===x.name))c.templateAssets.push({templateId:t.id,name:x.name});
+ }
+ if(use('notes'))for(const x of t.notes)add('notes',x,{description:x.description||''});
+ for(const k of ['events','reminders'])if(use(k))for(const x of t[k])add(k,x,{due:makeDate(x),description:'',...(k==='reminders'?{before:0,repeat:'none',done:false,fired:false}:{})});
+ const applied=templateScopes.filter(k=>use(k)&&applicable(k));
+ if(applied.length){if(!c.templateIds.includes(t.id))c.templateIds.push(t.id);c.templateSections[t.id]=[...new Set([...(c.templateSections[t.id]||[]),...applied])]}
 }
 function getTemplate(s,tid){const t=s.templates.find(x=>x.id===tid);if(!t)throw Error('Template not found');return t}
 
@@ -92,7 +110,7 @@ async function openDashboard(cid=''){return chrome.tabs.create({url:chrome.runti
 async function openWorkspace(c,s){const m=await maps();for(const [wid,cid] of Object.entries(m)){if(cid===c.id){try{await chrome.windows.update(Number(wid),{focused:true});return Number(wid)}catch{delete m[wid]}}}const urls=((c.restore??s.settings.restore)&&c.lastTabs?.length?c.lastTabs:c.sites.map(x=>x.url)).filter(urlOK);const w=await chrome.windows.create({url:urls.length?urls:chrome.runtime.getURL('index.html')+'#'+c.id,type:'normal',focused:true});m[w.id]=c.id;await chrome.storage.session.set({windows:m});await chrome.action.setBadgeText({text:String(c.number),tabId:w.tabs?.[0]?.id}).catch(()=>{});return w.id}
 async function dispatch(q){if(q.type==='get')return state();if(q.type==='context'){const m=await maps();return m[q.windowId]||null}if(q.type==='pendingTemplateSite'){const key='template-site:'+q.token;const x=(await chrome.storage.session.get(key))[key];await chrome.storage.session.remove(key);return x||null}const s=await state();let c=q.cid?client(s,q.cid):null;let result;
 switch(q.type){case 'demo':{if(!s.clients.some(c=>c.demo)&&!s.trash.some(t=>t.kind==='client'&&t.item.demo))seedDemo(s);break}
-case 'create':{const name=String(q.name||'').trim();if(!name)throw Error('Name required');const number=s.next++;c={id:id(),number,name,folder:String(number).padStart(6,'0')+'_'+clean(name),email:String(q.email||''),phone:String(q.phone||''),street:String(q.street||''),postalCode:String(q.postalCode||''),city:String(q.city||''),country:String(q.country||''),status:'active',tags:'',info:'',favorite:false,archived:false,tasks:[],notes:[],events:[],reminders:[],sites:[],credentials:[],lastTabs:[],created:Date.now()};normalizeClient(c);for(const x of s.defaultFields)appendField(c.fields,x,true);const t=s.templates.find(x=>x.id===q.template);if(t)applyTemplate(c,t);s.clients.push(c);log(s,c.id,'Kunde erstellt');result=c;break}
+case 'create':{const name=String(q.name||'').trim();if(!name)throw Error('Name required');const number=s.next++;c={id:id(),number,name,folder:String(number).padStart(6,'0')+'_'+clean(name),email:String(q.email||''),phone:String(q.phone||''),street:String(q.street||''),postalCode:String(q.postalCode||''),city:String(q.city||''),country:String(q.country||''),status:'active',tags:'',info:'',favorite:false,archived:false,tasks:[],notes:[],events:[],reminders:[],sites:[],credentials:[],lastTabs:[],created:Date.now()};normalizeClient(c);for(const x of s.defaultFields)appendField(c.fields,x,true);const t=s.templates.find(x=>x.id===q.template);if(t)applyTemplate(c,t,'all',q.baseDate);s.clients.push(c);log(s,c.id,'Kunde erstellt');result=c;break}
 case 'edit':for(const k of ['name','email','phone','street','postalCode','city','country','status','tags','info','favorite','archived','panel','restore','color'])if(Object.hasOwn(q.patch,k))c[k]=q.patch[k];log(s,c.id,'Kundendaten geändert');break;
 case 'archiveClient':case 'deleteClient':{if(!c.archived){c.archived=true;c.archivedAt=Date.now();log(s,c.id,'Kunde archiviert');}break}
 case 'reactivateClient':{if(c.archived){c.archived=false;c.reactivatedAt=Date.now();if(c.status==='done')c.status='active';log(s,c.id,'Kunde reaktiviert');}break}
@@ -103,11 +121,11 @@ case 'completeReminder':{const r=c.reminders.find(x=>x.id===q.itemId);if(!r)brea
 case 'snooze':{const r=c.reminders.find(x=>x.id===q.itemId);if(r){r.due=Date.now()+q.minutes*60000;r.before=0;r.fired=false}break}
 case 'settings':for(const k of Object.keys(BASE.settings))if(Object.hasOwn(q.patch,k))s.settings[k]=q.patch[k];if(Object.hasOwn(q.patch,'lang')&&chrome.contextMenus.removeAll)updateMenus(s.settings.lang);break;
 case 'vault':if(s.vault)throw Error('Vault already exists');s.vault=q.vault;break;
-case 'template':{const t=normalizeTemplate({id:id(),name:requiredText(q.item.name,100)});for(const kind of ['fields','tasks','documents','sites','folders'])for(const x of q.item[kind]||[])addTemplateEntry(t,kind,kind==='folders'?{name:x}:kind==='tasks'||kind==='documents'?(typeof x==='string'?{title:x}:x):kind==='sites'?(typeof x==='string'?{url:x,title:x}:x):x);s.templates.push(t);result=t;break}
-case 'templateApply':{const t=getTemplate(s,q.tid);applyTemplate(c,t);log(s,c.id,'Vorlage angewendet: '+t.name);result=c;break}
+case 'template':{const t=normalizeTemplate({id:id(),name:requiredText(q.item.name,100)});for(const kind of ['fields','tasks','documents','sites','folders','notes','events','reminders'])for(const x of q.item[kind]||[])addTemplateEntry(t,kind,kind==='folders'?{name:x}:kind==='tasks'||kind==='documents'?(typeof x==='string'?{title:x}:x):kind==='sites'?(typeof x==='string'?{url:x,title:x}:x):x);s.templates.push(t);result=t;break}
+case 'templateApply':{const t=getTemplate(s,q.tid);applyTemplate(c,t,q.scope||'all',q.baseDate);log(s,c.id,'Vorlage angewendet: '+t.name+(q.scope&&q.scope!=='all'?' – '+({fields:'Kundeninformationen',tasks:'Aufgaben',documents:'Unterlagen-Checkliste',sites:'Webseiten',files:'Dokumente',notes:'Notizen',events:'Termine',reminders:'Erinnerungen'}[q.scope]||q.scope):''));result=c;break}
 case 'templateEntry':{const t=getTemplate(s,q.tid);addTemplateEntry(t,q.kind,q.item);break}
 case 'templateRename':getTemplate(s,q.tid).name=requiredText(q.name,100);break;
-case 'templateRemoveEntry':{const t=getTemplate(s,q.tid);if(!['fields','tasks','documents','sites','folders','assets'].includes(q.kind)||!Number.isInteger(q.index)||q.index<0||q.index>=t[q.kind].length)throw Error('Invalid item');t[q.kind].splice(q.index,1);break}
+case 'templateRemoveEntry':{const t=getTemplate(s,q.tid);if(!['fields','tasks','documents','sites','folders','assets','notes','events','reminders'].includes(q.kind)||!Number.isInteger(q.index)||q.index<0||q.index>=t[q.kind].length)throw Error('Invalid item');t[q.kind].splice(q.index,1);break}
 case 'fieldAdd':{const field=appendField(c.fields,q.item,true);if(q.item.value!==undefined&&!field.value)field.value=String(q.item.value).slice(0,20000);if(q.defaultField)appendField(s.defaultFields,field);result=field;break}
 case 'fieldValue':{const field=c.fields.find(x=>x.id===q.fieldId);if(!field)throw Error('Field not found');field.value=String(q.value??'').slice(0,20000);break}
 case 'fieldDefault':{const field=c.fields.find(x=>x.id===q.fieldId);if(!field)throw Error('Field not found');appendField(s.defaultFields,field);break}

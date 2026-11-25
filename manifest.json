@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Clientora",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Lokale Kundenverwaltung und Browser-Arbeitsbereiche",
   "minimum_chrome_version": "116",
   "permissions": [

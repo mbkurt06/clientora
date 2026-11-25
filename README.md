@@ -1,4 +1,4 @@
-# Clientora v0.1.10 – Lokale Kundenverwaltung
+# Clientora v0.1.11 – Lokale Kundenverwaltung
 
 Clientora ist eine experimentelle Chrome-Erweiterung für Kundenverwaltung, Aufgaben, Termine, Erinnerungen, Dokumente und Browser-Arbeitsbereiche. Vor dem Einsatz mit echten Kundendaten bitte mit fiktiven Daten testen.
 
@@ -7,6 +7,12 @@ Clientora ist eine experimentelle Chrome-Erweiterung für Kundenverwaltung, Aufg
 1. Repository herunterladen oder mit `git pull origin main` aktualisieren.
 2. `chrome://extensions` öffnen, Entwicklermodus aktivieren, den Ordner mit manifest.json als entpackte Erweiterung laden bzw. die bestehende Erweiterung aktualisieren. Nicht deinstallieren, da lokale Metadaten verloren gehen können.
 3. Clientora öffnen, einen lokalen Speicherordner auswählen und bei Bedarf eine verschlüsselte Sicherung einrichten.
+
+## Version 0.1.11
+
+- Vorlagen können jederzeit nach der Kundenerstellung vollständig oder nur für einen Bereich angewendet werden: Kundeninformationen, Unterlagen-Checkliste, Aufgaben, Notizen, Webseiten, Dokumente, Termine und Erinnerungen. Der Kalender bietet Termin- und Erinnerungsvorlagen. Die Auswahl zeigt nur Vorlagen mit passenden Einträgen und eine Vorschau der Anzahl. Bestehende Daten werden nicht überschrieben, gleiche Einträge werden übersprungen.
+- Neue Vorlagenbausteine für allgemeine Notizen, Termine und Erinnerungen. Termine und Erinnerungen verwenden eine relative Tageszahl und Uhrzeit, ausgehend vom bei der Anwendung gewählten Startdatum. Bereits vorhandene gleichnamige Einträge behalten ihren Zustand und Termin. Passworttresor und Verlauf sind bewusst nicht als Vorlagen verfügbar.
+- Eine Vorlage kann in mehreren Bereichen unabhängig verwendet werden; die Kundeninformationen zeigen die angewendeten Bereiche. Kein automatisches Verteilen späterer Änderungen.
 
 ## Version 0.1.10
 
