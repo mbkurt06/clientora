@@ -1,4 +1,4 @@
-# Clientora v0.1.5 — local-first Chrome extension
+# Clientora v0.1.6 — local-first Chrome extension
 
 **Deneysel ilk sürüm.** Gerçek veya hassas müşteri verisi girmeden önce sahte verilerle test edin. Chrome 116+ / güncel Chromium önerilir. Sunucu veya npm kurulumu gerektirmez.
 
@@ -10,6 +10,10 @@
 4. Paketlenmemiş öğe yükle (Entpackte Erweiterung laden / Load unpacked) ile klasörü seçin.
 5. Araç çubuğuna Clientora simgesini sabitleyin. Simgeye tıklayın; müşteri penceresinde simge sağ paneli açmayı dener. Alt+Shift+C ana sayfayı açar.
 6. Ayarlar > Belgeler ile yerel ana klasörün üst dizinini seçin. Clientora alt klasörünü kendisi oluşturur. Klasör erişimini gerektiğinde yeniden verin.
+
+## v0.1.6 — Dialog kapatma ve varsayılan alanlar
+- Dialog dışına tıklama ile kapatma; Escape ve Vazgeç desteği. Kaydetme devam ederken yanlışlıkla kapatma engellenir.
+- İlk altı hazır ek alan da düzenlenebilir varsayılan alan tanımlarına taşındı. Üç nokta menüsünden veya Ayarlar > Standard-Kundenfelder bölümünden varsayılan ekleme/çıkarma. Mevcut müşterilerin değerleri ve şablonlar korunur. Müşteriden alan silme ayrı işlemdir; yeni müşteriye yalnız etkin varsayılanlar eklenir.
 
 ## v0.1.5 — Kompakt müşteri bilgileri ve arşiv
 - Müşteri bilgileri sola hizalandı. Ek alanlar doğrudan düzenlenebilir, toplu kaydetme ve üç nokta menüsü ile varsayılan/şablon/silme seçenekleri kompaktlaştırıldı.

@@ -2,7 +2,7 @@ if(typeof importScripts==='function')importScripts('files.js');
 const BASE={clients:[],next:1,settings:{lang:'auto',theme:'auto',detail:'same',panel:true,restore:true,downloads:'auto',relative:false,dashboardView:'today'},templates:[],vault:null,history:[],trash:[]};
 let queue=Promise.resolve();
 const run=f=>{const p=queue.then(f);queue=p.catch(console.error);return p};
-async function state(){const {data}=await chrome.storage.local.get('data');const s={...BASE,...data,settings:{...BASE.settings,...data?.settings}};let changed=false;if(!s.demoInitialized){s.demoInitialized=true;if(!s.clients.length&&!s.trash.length&&s.next===1)seedDemo(s);changed=true}if(!s.templatePresetsInitialized||!Array.isArray(s.defaultFields)||s.clients.some(c=>!Array.isArray(c.fields)||!Array.isArray(c.documents)))changed=true;upgradeSchema(s);if(changed)await save(s);return s}
+async function state(){const {data}=await chrome.storage.local.get('data');const s={...BASE,...data,settings:{...BASE.settings,...data?.settings}};let changed=false;if(!s.demoInitialized){s.demoInitialized=true;if(!s.clients.length&&!s.trash.length&&s.next===1)seedDemo(s);changed=true}if(!s.defaultFieldsMigrated||!s.templatePresetsInitialized||!Array.isArray(s.defaultFields)||s.clients.some(c=>!Array.isArray(c.fields)||!Array.isArray(c.documents)))changed=true;upgradeSchema(s);if(changed)await save(s);return s}
 async function maps(){return (await chrome.storage.session.get('windows')).windows||{}}
 async function save(s){await chrome.storage.local.set({data:s})}
 const id=()=>crypto.randomUUID();
@@ -19,7 +19,7 @@ const requiredText=(v,max=300)=>{const t=String(v||'').trim();if(!t||t.length>ma
 function fieldDef(x){return {label:requiredText(x.label,100),type:fieldTypes.includes(x.type)?x.type:'text'}}
 function appendField(a,x,withValue=false){const d=fieldDef(x);let old=a.find(y=>norm(y.label)===norm(d.label));if(!old){old={id:id(),...d,...(withValue?{value:''}:{})};a.push(old)}return old}
 function normalizeTemplate(t){return {...t,fields:Array.isArray(t.fields)?t.fields:[],tasks:Array.isArray(t.tasks)?t.tasks.map(x=>typeof x==='string'?{title:x}:x):[],sites:Array.isArray(t.sites)?t.sites.map(x=>typeof x==='string'?{title:x,url:x}:x):[],documents:Array.isArray(t.documents)?t.documents:[],folders:Array.isArray(t.folders)?t.folders:[],assets:Array.isArray(t.assets)?t.assets:[]}}
-function normalizeClient(c){c.fields=Array.isArray(c.fields)?c.fields:[];c.documents=Array.isArray(c.documents)?c.documents:[];c.templateIds=Array.isArray(c.templateIds)?c.templateIds:[];c.templateAssets=Array.isArray(c.templateAssets)?c.templateAssets:[];c.folders=Array.isArray(c.folders)?c.folders:[];for(const [label,type] of standardFields)appendField(c.fields,{label,type},true);return c}
+function normalizeClient(c){c.fields=Array.isArray(c.fields)?c.fields:[];c.documents=Array.isArray(c.documents)?c.documents:[];c.templateIds=Array.isArray(c.templateIds)?c.templateIds:[];c.templateAssets=Array.isArray(c.templateAssets)?c.templateAssets:[];c.folders=Array.isArray(c.folders)?c.folders:[];return c}
 const local=(en,de,tr)=>{const l=(chrome.i18n?.getUILanguage?.()||'en').slice(0,2);return l==='de'?de:l==='tr'?tr:en};
 function builtInTemplates(){const T=local;
 const make=(id,name,fields,documents,sites,tasks,folders)=>normalizeTemplate({id,name,fields:fields.map(([label,type])=>({label,type})),documents:documents.map(title=>({title})),sites:sites.map(([title,url])=>({title,url})),tasks:tasks.map(title=>({title})),folders,assets:[]});
@@ -31,6 +31,7 @@ make('preset-residence',T('Residence permit','Aufenthaltstitel','Oturum izni'),[
 ]}
 function upgradeSchema(s){
  s.defaultFields=Array.isArray(s.defaultFields)?s.defaultFields:[];
+ if(!s.defaultFieldsMigrated){for(const [label,type] of standardFields)appendField(s.defaultFields,{label,type});for(const c of [...s.clients,...(s.trash||[]).filter(x=>x.kind==='client').map(x=>x.item)]){normalizeClient(c);for(const [label,type] of standardFields)appendField(c.fields,{label,type},true)}s.defaultFieldsMigrated=true}
  s.templates=(s.templates||[]).map(normalizeTemplate);
  if(!s.templatePresetsInitialized){s.templatePresetsInitialized=true;for(const t of builtInTemplates())if(!s.templates.some(x=>x.id===t.id))s.templates.push(t)}
  for(const c of s.clients)normalizeClient(c);
@@ -80,7 +81,7 @@ function seedDemo(s){
  const item=(x)=>({id:id(),created:now,...x});
  for(const [i,[name,tag,status,color,subject,appointment,sites,tasks]] of cases.entries()){
  const number=s.next++,c={id:id(),number,name,folder:String(number).padStart(6,'0')+'_'+clean(name),email:'demo'+(i+1)+'@example.invalid',phone:'',street:'DEMO Musterstraße '+(i+1),postalCode:'00000',city:'DEMO Musterstadt',country:'Deutschland',status,tags:'DEMO, '+tag,info:'DEMO / TEST — Fiktive Beispieldaten. '+subject+'. No real customer or account.',favorite:i===0,archived:false,demo:true,demoSubject:subject,color,tasks:tasks.map((title,j)=>item({title,description:'DEMO — '+subject,status:j===0||i===4&&j<4?'done':j===1?'progress':j===2?'waiting':'todo',priority:j===2?'high':'normal',due:day(j===0?-3:j===1?-1:j===2?0:j===3?i+1:7),completed:j===0||i===4&&j<4?now:null})),notes:[item({title:'Initial consultation',description:'DEMO — '+subject+'. Client provided preliminary details. Verify all requirements before submitting anything.'}),item({title:'Follow-up note',description:'DEMO — '+tasks[2]+'. No real application has been submitted.'}),item({title:'Document checklist',description:'DEMO — Example files are available in the client folder after selecting local storage.'})],events:[item({title:appointment,description:'DEMO — simulated appointment, not booked.',due:day(i===0?0:i,9+i)}),item({title:'Document review',description:'DEMO — simulated follow-up.',due:day(i+7,14)})],reminders:[item({title:'DEMO — '+tasks[4],description:'Example reminder; no real action required.',due:day(i+1,11),before:15,repeat:'none',done:false,fired:false}),item({title:'DEMO — Weekly case check',description:'Example recurring reminder.',due:day(i+7,15),before:0,repeat:'weekly',done:false,fired:false})],sites:sites.map(([title,url])=>item({title,url})),credentials:[],lastTabs:[],folders:[tag],created:now+i};
- s.clients.push(c);log(s,c.id,'DEMO client created');
+ normalizeClient(c);for(const x of s.defaultFields||[])appendField(c.fields,x,true);s.clients.push(c);log(s,c.id,'DEMO client created');
  }
  return true;
 }
@@ -111,8 +112,8 @@ case 'fieldAdd':{const field=appendField(c.fields,q.item,true);if(q.item.value!=
 case 'fieldValue':{const field=c.fields.find(x=>x.id===q.fieldId);if(!field)throw Error('Field not found');field.value=String(q.value??'').slice(0,20000);break}
 case 'fieldDefault':{const field=c.fields.find(x=>x.id===q.fieldId);if(!field)throw Error('Field not found');appendField(s.defaultFields,field);break}
 case 'fieldDefaultAdd':appendField(s.defaultFields,q.item);break;
-case 'fieldDefaultRemove':s.defaultFields=s.defaultFields.filter(x=>x.id!==q.fieldId);break;
-case 'fieldRemove':c.fields=c.fields.filter(x=>x.id!==q.fieldId||standardFields.some(y=>y[0]===x.label));break;
+case 'fieldDefaultRemove':{if(q.label!==undefined)s.defaultFields=s.defaultFields.filter(x=>norm(x.label)!==norm(q.label));else s.defaultFields=s.defaultFields.filter(x=>x.id!==q.fieldId);break}
+case 'fieldRemove':c.fields=c.fields.filter(x=>x.id!==q.fieldId);break;
 case 'open':return openWorkspace(c,s);
 case 'snapshot':{const m=await maps();if(m[q.windowId]!==c.id)throw Error('Wrong workspace');c.lastTabs=(await chrome.tabs.query({windowId:q.windowId})).map(x=>x.url).filter(urlOK);break}
 case 'history':log(s,c.id,String(q.text).slice(0,500));break;
