@@ -11,15 +11,15 @@ function demoPDF(lines){
 }
 FS.demoFiles=async function(c,h){
  if(!c.demo)return;
- const marker='demo-files-de-v1:'+c.id,old=await this.get(marker);
+ const marker='demo-files-de-v2:'+c.id,old=await this.get(marker);
  if(old&&await old.isSameEntry(h).catch(()=>false))return;
  const title='CLIENTORA – MUSTER, KEIN ECHTES DOKUMENT',subject=c.demoSubject||'Beispielvorgang';
  const records=[
  ['Dokumente','MUSTER_Antrag.pdf',demoPDF([title,'Übersicht zum Musterantrag','Kundennummer: '+c.number,'Vorgang: '+subject,'Status: Musterentwurf','Es wurde kein Antrag eingereicht.'])],
  ['Dokumente','MUSTER_Eingang.pdf',demoPDF([title,'Beispiel für Schriftverkehr','Kundennummer: '+c.number,'Vorgang: '+subject,'Nur ein Muster, kein amtlicher Bescheid.'])],
- ['Dokumente','MUSTER_Begleitschreiben.txt',title+'\n'+c.name+'\n'+subject+'\nMusterbegleitschreiben. Es wurde keine Nachricht versendet.\n'],
+ ['Dokumente','MUSTER_Begleitschreiben.docx',demoDOCX('Begleitschreiben',['Kunde: '+c.name,'Kundennummer: '+c.number,'Betreff: '+subject,'Sehr geehrte Damen und Herren,','anbei erhalten Sie die beispielhaft zusammengestellten Unterlagen zum oben genannten Vorgang. Bitte bestätigen Sie den Eingang und teilen Sie uns mit, falls weitere Nachweise erforderlich sind.','Mit freundlichen Grüßen','Clientora – Musterberatung'])],
  ['Dokumente','MUSTER_Checkliste.csv','Aufgabe,Status\n'+c.tasks.map(x=>'"'+x.title.replace(/"/g,'""')+'","'+({todo:'Offen',progress:'In Arbeit',waiting:'Wartet',done:'Erledigt'}[x.status]||x.status)+'"').join('\n')+'\n'],
- ['Dokumente','MUSTER_Hinweise.txt',title+'\nAlle Angaben sind frei erfunden. Keine echten Ausweisdokumente oder Zugangsdaten enthalten.\n']
+ ['Dokumente','MUSTER_Hinweise.docx',demoDOCX('Beratungsnotiz',['Kunde: '+c.name,'Vorgang: '+subject,'Gesprächsnotiz','Die Angaben wurden beispielhaft aufgenommen. Vor einer tatsächlichen Antragstellung sind alle Anforderungen der zuständigen Stelle zu prüfen.','Nächste Schritte: Unterlagen prüfen, fehlende Nachweise anfordern und einen Folgetermin vereinbaren.','Alle Angaben sind frei erfunden. Keine echten Ausweisdokumente oder Zugangsdaten enthalten.'])]
  ];
  for(const [folder,name,body] of records){
  const dir=await h.getDirectoryHandle(folder,{create:true});
@@ -89,3 +89,25 @@ FS.nativeFolderMarker=async function(root){
 };
 
 FS.layoutDir=async function(root,german,legacy){try{return await root.getDirectoryHandle(legacy)}catch(e){if(e.name!=='NotFoundError')throw e}return root.getDirectoryHandle(german,{create:true})};
+
+function docxZip(files){
+ const enc=new TextEncoder(),chunks=[],central=[];let offset=0,centralSize=0;
+ const crc32=bytes=>{let crc=0xffffffff;for(const b of bytes){crc^=b;for(let k=0;k<8;k++)crc=(crc>>>1)^((crc&1)?0xedb88320:0)}return (crc^0xffffffff)>>>0};
+ const header=n=>{const bytes=new Uint8Array(n);return {bytes,v:new DataView(bytes.buffer)}};
+ const u16=(v,o,n)=>v.setUint16(o,n,true),u32=(v,o,n)=>v.setUint32(o,n>>>0,true);
+ for(const [name,xml] of Object.entries(files)){
+  const nb=enc.encode(name),data=enc.encode(xml),crc=crc32(data),lh=header(30),ch=header(46);
+  u32(lh.v,0,0x04034b50);u16(lh.v,4,20);u16(lh.v,6,0x800);u16(lh.v,12,0x21);u32(lh.v,14,crc);u32(lh.v,18,data.length);u32(lh.v,22,data.length);u16(lh.v,26,nb.length);
+  u32(ch.v,0,0x02014b50);u16(ch.v,4,20);u16(ch.v,6,20);u16(ch.v,8,0x800);u16(ch.v,14,0x21);u32(ch.v,16,crc);u32(ch.v,20,data.length);u32(ch.v,24,data.length);u16(ch.v,28,nb.length);u32(ch.v,42,offset);
+  chunks.push(lh.bytes,nb,data);central.push(ch.bytes,nb);offset+=30+nb.length+data.length;centralSize+=46+nb.length;
+ }
+ const end=header(22);u32(end.v,0,0x06054b50);u16(end.v,8,Object.keys(files).length);u16(end.v,10,Object.keys(files).length);u32(end.v,12,centralSize);u32(end.v,16,offset);
+ const out=new Uint8Array(offset+centralSize+22);let at=0;for(const part of [...chunks,...central,end.bytes]){out.set(part,at);at+=part.length}return out;
+}
+function demoDOCX(title,paragraphs){
+ const esc=s=>String(s).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const p=(text,size=22,bold=false,color='243247',after=180)=>'<w:p><w:pPr><w:spacing w:after="'+after+'" w:line="276" w:lineRule="auto"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/>'+(bold?'<w:b/>':'')+'<w:color w:val="'+color+'"/><w:sz w:val="'+size+'"/><w:szCs w:val="'+size+'"/><w:lang w:val="de-DE"/></w:rPr><w:t xml:space="preserve">'+esc(text)+'</w:t></w:r></w:p>';
+ const xml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+ const document=xml+'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+p('CLIENTORA  |  MUSTERDOKUMENT',20,true,'52657D',240)+p(title,36,true,'243247',360)+paragraphs.map(x=>p(x)).join('')+p('Fiktive Beispieldaten – kein amtliches Dokument.',18,false,'64748B',0)+'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>';
+ return docxZip({'[Content_Types].xml':xml+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>','_rels/.rels':xml+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>','word/document.xml':document});
+}

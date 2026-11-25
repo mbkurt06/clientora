@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
-from host import resolve_folder, MARKER, read_message, write_message
+from host import resolve_folder, resolve_target, MARKER, read_message, write_message
 import io
 
 class HostTests(unittest.TestCase):
@@ -31,6 +31,33 @@ class HostTests(unittest.TestCase):
             else:
                 with self.assertRaises(ValueError):
                     resolve_folder(config, {**msg, "parts": ["Musteriler", client.name, "escape"]})
+    def test_open_documents(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "Clientora"
+            client = root / "Kunden" / "000001_Test"
+            client.mkdir(parents=True)
+            marker = "12345678-1234-1234-1234-123456789abc"
+            (root / MARKER).write_text(marker)
+            doc = client / "Test.docx"
+            doc.write_bytes(b"example")
+            executable = client / "Test.exe"
+            executable.write_bytes(b"example")
+            config = {"root": str(root)}
+            msg = {"action": "openFile", "marker": marker, "parts": ["Kunden", client.name, doc.name]}
+            self.assertEqual(resolve_target(config, msg), doc.resolve())
+            with self.assertRaises(ValueError):
+                resolve_target(config, {**msg, "parts": ["Kunden", client.name, executable.name]})
+            with self.assertRaises(ValueError):
+                resolve_target(config, {**msg, "parts": ["Kunden", client.name]})
+            outside = root / "Outside.docx"
+            outside.write_bytes(b"outside")
+            try:
+                (client / "Alias.docx").symlink_to(outside)
+            except (OSError, NotImplementedError):
+                pass
+            else:
+                with self.assertRaises(ValueError):
+                    resolve_target(config, {**msg, "parts": ["Kunden", client.name, "Alias.docx"]})
     def test_protocol(self):
         stream = io.BytesIO()
         write_message(stream, {"ok": True})

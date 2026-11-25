@@ -1,4 +1,4 @@
-# Clientora v0.1.9 – Lokale Kundenverwaltung
+# Clientora v0.1.10 – Lokale Kundenverwaltung
 
 Clientora ist eine experimentelle Chrome-Erweiterung für Kundenverwaltung, Aufgaben, Termine, Erinnerungen, Dokumente und Browser-Arbeitsbereiche. Vor dem Einsatz mit echten Kundendaten bitte mit fiktiven Daten testen.
 
@@ -7,6 +7,11 @@ Clientora ist eine experimentelle Chrome-Erweiterung für Kundenverwaltung, Aufg
 1. Repository herunterladen oder mit `git pull origin main` aktualisieren.
 2. `chrome://extensions` öffnen, Entwicklermodus aktivieren, den Ordner mit manifest.json als entpackte Erweiterung laden bzw. die bestehende Erweiterung aktualisieren. Nicht deinstallieren, da lokale Metadaten verloren gehen können.
 3. Clientora öffnen, einen lokalen Speicherordner auswählen und bei Bedarf eine verschlüsselte Sicherung einrichten.
+
+## Version 0.1.10
+
+- Ein Klick auf ein unterstütztes Dokument öffnet die Originaldatei in der Standardanwendung des Betriebssystems. Keine erneute Kopie im Downloadordner. Änderungen werden in der Originaldatei gespeichert, wenn der Editor diese normal speichert. Das lokale Hilfsprogramm muss einmal mit `python3 native/install.py` bzw. `py -3 native/install.py` aktualisiert werden. PDF, Bilder und Text bieten zusätzlich eine Browservorschau ohne Download. Aus Sicherheitsgründen werden ausführbare Dateien und nicht erlaubte Typen nicht automatisch gestartet.
+- Neue deutsche Musterdateien enthalten zwei bearbeitbare DOCX-Dokumente (Begleitschreiben und Beratungsnotiz) statt TXT. Bereits vorhandene TXT-Dateien werden nicht gelöscht oder überschrieben.
 
 ## Version 0.1.9
 

@@ -78,7 +78,7 @@ def main():
         with winreg.CreateKey(winreg.HKEY_CURRENT_USER,
                               r"Software\Google\Chrome\NativeMessagingHosts" + "\\" + HOST) as key:
             winreg.SetValueEx(key, "", 0, winreg.REG_SZ, str(manifest))
-    print("Installed for Google Chrome. Return to Clientora and click Open in file manager.")
+    print("Installed for Google Chrome. Return to Clientora and open a document or folder.")
     print("Only this data folder is authorized:", root)
     print("No administrator rights or server required.")
 
