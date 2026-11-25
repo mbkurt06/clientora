@@ -1,4 +1,4 @@
-# Clientora v0.1.2 — local-first Chrome extension
+# Clientora v0.1.3 — local-first Chrome extension
 
 **Deneysel ilk sürüm.** Gerçek veya hassas müşteri verisi girmeden önce sahte verilerle test edin. Chrome 116+ / güncel Chromium önerilir. Sunucu veya npm kurulumu gerektirmez.
 
@@ -10,6 +10,13 @@
 4. Paketlenmemiş öğe yükle (Entpackte Erweiterung laden / Load unpacked) ile klasörü seçin.
 5. Araç çubuğuna Clientora simgesini sabitleyin. Simgeye tıklayın; müşteri penceresinde simge sağ paneli açmayı dener. Alt+Shift+C ana sayfayı açar.
 6. Ayarlar > Belgeler ile yerel ana klasörün üst dizinini seçin. Clientora alt klasörünü kendisi oluşturur. Klasör erişimini gerektiğinde yeniden verin.
+
+## v0.1.3 — Adres, klasör kurulumu, otomatik yedek
+- Müşteri kaydı ve düzenleme ekranına sokak/bina, posta kodu, şehir, ülke alanları; arama ve müşteri genel görünümüne adres eklendi.
+- İlk ana sayfada klasör seçimi yönlendirmesi. Klasör izni IndexedDB ile hatırlanır; izin düşerse yeniden bağlantı istenir. Seçilen yerel veya eşitlenen dizin altında Clientora oluşturulur. Klasör değişimi mevcut dosyaları taşımaz; indirme diziniyle eşleşme ayarı sıfırlanır.
+- Ayarlar > Otomatik şifreli yedekleme: kullanıcı ayrı bir parola belirler. PBKDF2 (600.000 SHA-256 iterasyon), AES-GCM 256 bit, rastgele IV; dışarı aktarılamayan şifreleme anahtarı yalnız Chrome profilinin IndexedDB alanında tutulur, parola yazılmaz. Mevcut içe aktarma işlevi ve parola ile yedek açılır. Chrome çalışırken ve izin varken değişen metadata yaklaşık dakikada bir Yedekler dizinine yazılır; cihaz başına günlük anlık görüntü güncellenir, önceki günler silinmez. Son başarılı yedek ve hata durumu ayarlarda gösterilir.
+- OneDrive, Google Drive veya Dropbox masaüstü eşitlemesi kullanıcının sorumluluğundadır. Clientora doğrudan bulut API kullanmaz. Belgeler normal dosyalardır ve ayrıca şifrelenmez. Aynı klasörde eşzamanlı birden çok Clientora kurulumu desteklenmez; yeni bilgisayarda yedek içe aktarılmalıdır. Bulut eşitleme tek başına kesin veri kurtarma garantisi değildir.
+- Gerçek Chrome, işletim sistemi, klasör izni ve eşitleme testleri gereklidir.
 
 ## v0.1.2 — Demo verileri
 - Boş kurulumda otomatik 5 kurgusal müşteri, her birinde 5 web sitesi, 5 görev, 3 not, 2 randevu ve 2 hatırlatma. Gerçek başvuru veya hesap yoktur.

@@ -28,3 +28,38 @@ FS.demoFiles=async function(c,h){
  }
  await this.put(h,marker);
 };
+
+/* Automatic encrypted metadata snapshots. Key stays in this Chrome profile's IndexedDB. */
+const backup64=b=>{let s='';for(let i=0;i<b.length;i+=16384)s+=String.fromCharCode(...b.subarray(i,i+16384));return btoa(s)};
+FS.enableBackup=async function(password){
+ if(password.length<12)throw Error('Minimum 12 characters');
+ await this.root();
+ const salt=crypto.getRandomValues(new Uint8Array(16)),enc=new TextEncoder();
+ const material=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
+ const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:600000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt']);
+ await this.put({key,salt:backup64(salt),device:crypto.randomUUID(),last:0,digest:''},'auto-backup');return this.autoBackup(true);
+};
+FS.backupStatus=async function(){const cfg=await this.get('auto-backup');return cfg?{enabled:true,last:cfg.last||0,error:cfg.error||''}:{enabled:false,last:0,error:''}};
+FS.disableBackup=async function(){const job=()=>this.put(null,'auto-backup');return typeof navigator!=='undefined'&&navigator.locks?navigator.locks.request('clientora-auto-backup',job):job()};
+FS.autoBackup=async function(force=false){
+ const self=this;
+ const job=async()=>{
+  const cfg=await self.get('auto-backup');if(!cfg)return false;
+  if(!force&&Date.now()-(cfg.lastAttempt||0)<60000)return false;
+  cfg.lastAttempt=Date.now();
+  try{
+   const root=await self.root(),{data}=await chrome.storage.local.get('data');if(!data)return false;
+   const bytes=new TextEncoder().encode(JSON.stringify(data));
+   const digest=backup64(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)));
+   const same=cfg.root&&await cfg.root.isSameEntry(root).catch(()=>false);
+   if(!force&&same&&cfg.digest===digest){cfg.error='';await self.put(cfg,'auto-backup');return false}
+   const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},cfg.key,bytes);
+   const payload={version:1,salt:cfg.salt,iv:backup64(iv),cipher:backup64(new Uint8Array(cipher))};
+   const date=new Date().toISOString().slice(0,10),dir=await root.getDirectoryHandle('Yedekler',{create:true});
+   const handle=await dir.getFileHandle('Clientora-auto-'+date+'-'+cfg.device+'.clientora',{create:true});
+   const writable=await handle.createWritable();try{await writable.write(JSON.stringify(payload));await writable.close()}catch(e){try{await writable.abort()}catch{}throw e}
+   cfg.digest=digest;cfg.last=Date.now();cfg.root=root;cfg.error='';await self.put(cfg,'auto-backup');return true;
+  }catch(e){cfg.error=String(e.message||e);await self.put(cfg,'auto-backup');throw e}
+ };
+ return typeof navigator!=='undefined'&&navigator.locks?navigator.locks.request('clientora-auto-backup',job):job();
+};
