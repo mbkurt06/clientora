@@ -1,4 +1,4 @@
-# Clientora v0.1.4 — local-first Chrome extension
+# Clientora v0.1.5 — local-first Chrome extension
 
 **Deneysel ilk sürüm.** Gerçek veya hassas müşteri verisi girmeden önce sahte verilerle test edin. Chrome 116+ / güncel Chromium önerilir. Sunucu veya npm kurulumu gerektirmez.
 
@@ -10,6 +10,11 @@
 4. Paketlenmemiş öğe yükle (Entpackte Erweiterung laden / Load unpacked) ile klasörü seçin.
 5. Araç çubuğuna Clientora simgesini sabitleyin. Simgeye tıklayın; müşteri penceresinde simge sağ paneli açmayı dener. Alt+Shift+C ana sayfayı açar.
 6. Ayarlar > Belgeler ile yerel ana klasörün üst dizinini seçin. Clientora alt klasörünü kendisi oluşturur. Klasör erişimini gerektiğinde yeniden verin.
+
+## v0.1.5 — Kompakt müşteri bilgileri ve arşiv
+- Müşteri bilgileri sola hizalandı. Ek alanlar doğrudan düzenlenebilir, toplu kaydetme ve üç nokta menüsü ile varsayılan/şablon/silme seçenekleri kompaktlaştırıldı.
+- Danışmanlık bitince müşteri arşivlenir, fiziksel dosyalar ve metadata korunur. Arşiv tarihi tutulur; liste filtresinden arşiv açılabilir ve müşteri yeniden etkinleştirilebilir. Arama arşivdekileri de kapsar (favori/arşiv filtresi hariç). Aktif genel bakış ve bildirimler arşivdeki müşterileri içermez. Önceki müşteri çöp kutusu kayıtları geri yüklenebilir.
+- Arşivlenmiş müşteri tekrar etkinleştirildiğinde tamamlandı durumundaysa aktif olarak işaretlenir, diğer durumlar ve görevler korunur.
 
 ## v0.1.4 — Müşteri bilgi sayfası ve şablonlar
 - Kundeninformationen sekmesinde temel bilgiler ve ek alanlar (metin, tarih, sayı, e-posta, telefon, URL, uzun metin). Alan tanımı varsayılan olarak gelecekteki müşteriler için kaydedilebilir; kişisel değerler kopyalanmaz.
