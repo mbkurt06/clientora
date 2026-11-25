@@ -1,4 +1,4 @@
-# Clientora v0.1.1 — local-first Chrome extension
+# Clientora v0.1.2 — local-first Chrome extension
 
 **Deneysel ilk sürüm.** Gerçek veya hassas müşteri verisi girmeden önce sahte verilerle test edin. Chrome 116+ / güncel Chromium önerilir. Sunucu veya npm kurulumu gerektirmez.
 
@@ -10,6 +10,12 @@
 4. Paketlenmemiş öğe yükle (Entpackte Erweiterung laden / Load unpacked) ile klasörü seçin.
 5. Araç çubuğuna Clientora simgesini sabitleyin. Simgeye tıklayın; müşteri penceresinde simge sağ paneli açmayı dener. Alt+Shift+C ana sayfayı açar.
 6. Ayarlar > Belgeler ile yerel ana klasörün üst dizinini seçin. Clientora alt klasörünü kendisi oluşturur. Klasör erişimini gerektiğinde yeniden verin.
+
+## v0.1.2 — Demo verileri
+- Boş kurulumda otomatik 5 kurgusal müşteri, her birinde 5 web sitesi, 5 görev, 3 not, 2 randevu ve 2 hatırlatma. Gerçek başvuru veya hesap yoktur.
+- Ayarlar > Belgeler bölümünde bir üst klasör seçildiğinde 5 müşteri klasörü ve standart alt klasörler, örnek PDF/TXT/CSV belgeleriyle oluşturulur. macOS, Windows, Linux için aynı Chrome klasör seçicisi kullanılır; sabit OS yolu yoktur.
+- Mevcut kayıtlar değiştirilmez. Ayarlar > Örnek veriler üzerinden kurgusal müşteri eklenebilir; aynı demo seti iki kez eklenmez. Örnek dosyaların üzerine yazılmaz. Belge erişimi kullanıcı izni gerektirir.
+- Demo verileri gerçek web sitelerinin genel giriş sayfalarını kullanır; gerçek hesap, parola veya başvuru içermez. Randevular gerçek rezervasyon değildir. Demo içerikleri ağırlıklı İngilizce/Almancadır.
 
 ## v0.1.1
 - Ana sayfada kompakt istatistikler ve varsayılan Bugün ajandası (randevu, görev, hatırlatma, geciken görev).
