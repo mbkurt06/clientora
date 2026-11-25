@@ -43,7 +43,7 @@ jobs:
           cat > "stage/Clientora Setup.app/Contents/Info.plist" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0"><dict><key>CFBundleExecutable</key><string>clientora-setup</string><key>CFBundleIdentifier</key><string>com.clientora.setup</string><key>CFBundleName</key><string>Clientora Setup</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleVersion</key><string>0.1.12</string></dict></plist>
+          <plist version="1.0"><dict><key>CFBundleExecutable</key><string>clientora-setup</string><key>CFBundleIdentifier</key><string>com.clientora.setup</string><key>CFBundleName</key><string>Clientora Setup</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleVersion</key><string>0.1.14</string></dict></plist>
           PLIST
           codesign --force --sign - "stage/Clientora Setup.app"
           hdiutil create -volname "Clientora Setup" -srcfolder stage -format UDZO "dist/Clientora-Setup-macOS-${{ matrix.arch }}.dmg"
@@ -53,7 +53,7 @@ jobs:
         run: |
           mkdir -p dist stage/DEBIAN stage/usr/bin stage/usr/share/applications
           (cd native && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o ../stage/usr/bin/clientora-setup .)
-          printf 'Package: clientora-setup\nVersion: 0.1.12\nArchitecture: amd64\nMaintainer: Clientora\nDepends: zenity, xdg-utils\nDescription: Clientora Einrichtung und lokaler Dokumentenhelfer\n' > stage/DEBIAN/control
+          printf 'Package: clientora-setup\nVersion: 0.1.14\nArchitecture: amd64\nMaintainer: Clientora\nDepends: zenity, xdg-utils\nDescription: Clientora Einrichtung und lokaler Dokumentenhelfer\n' > stage/DEBIAN/control
           printf '[Desktop Entry]\nName=Clientora Setup\nExec=clientora-setup\nType=Application\nTerminal=false\nCategories=Office;\n' > stage/usr/share/applications/clientora-setup.desktop
           dpkg-deb --root-owner-group --build stage dist/Clientora-Setup-Linux-amd64.deb
       - uses: actions/upload-artifact@v4

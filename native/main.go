@@ -13,7 +13,7 @@ import (
  "strings"
 )
 const hostName = "com.clientora.filemanager"
-const helperVersion = "0.1.12"
+const helperVersion = "0.1.14"
 // Set at release build time only after the official Web Store listing exists.
 var storeID string
 var idRE = regexp.MustCompile("^[a-p]{32}$")
@@ -25,7 +25,17 @@ type response struct {OK bool `json:"ok"`; Error string `json:"error,omitempty"`
 func readConfig(path string)(config,error){var c config;b,e:=os.ReadFile(path);if e==nil{e=json.Unmarshal(b,&c)};return c,e}
 func readMessage(r io.Reader)(request,error){var q request;var size uint32;if e:=binary.Read(r,binary.LittleEndian,&size);e!=nil{return q,e};if size==0||size>65536{return q,errors.New("Ungültige Nachricht")};b:=make([]byte,size);if _,e:=io.ReadFull(r,b);e!=nil{return q,e};return q,json.Unmarshal(b,&q)}
 func writeMessage(w io.Writer,r response)error{b,e:=json.Marshal(r);if e!=nil{return e};if e=binary.Write(w,binary.LittleEndian,uint32(len(b)));e!=nil{return e};_,e=w.Write(b);return e}
-func safePart(p string)bool{if p==""||p=="."||p==".."||len(p)>255||strings.ContainsAny(p,"\/:*?"<>|")||strings.HasSuffix(p,".")||strings.HasSuffix(p," "){return false};for _,r:=range p{if r<32{return false}};return true}
+func safePart(p string) bool {
+ if p == "" || p == "." || p == ".." || len(p) > 255 || strings.HasSuffix(p, ".") || strings.HasSuffix(p, " ") { return false }
+ for _, r := range p {
+  switch r {
+  case 92, 47, 58, 42, 63, 34, 60, 62, 124:
+   return false
+  }
+  if r < 32 || r == 127 { return false }
+ }
+ return true
+}
 func inside(root,target string)bool{rel,e:=filepath.Rel(root,target);return e==nil&&rel!=".."&&!strings.HasPrefix(rel,".."+string(os.PathSeparator))&&!filepath.IsAbs(rel)}
 func samePath(a,b string)bool{if runtime.GOOS=="windows"{return strings.EqualFold(a,b)};return a==b}
 func resolve(c config,q request)(string,error){
