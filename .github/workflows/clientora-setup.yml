@@ -81,14 +81,16 @@ jobs:
           name: Clientora-${{ matrix.target }}
           path: dist/*
           if-no-files-found: error
-  package:
+  package-and-publish:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          pattern: Clientora-*
+          pattern: Clientora-[wdl]*
           path: packages
       - name: Assemble extension and all installers
         shell: bash
@@ -111,19 +113,8 @@ jobs:
           name: Clientora-Komplett
           path: dist/*
           if-no-files-found: error
-  publish:
-    needs: package
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: Clientora-Komplett
-          path: dist
       - name: Install compiled setup files into the main branch
+        if: github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail
@@ -132,6 +123,7 @@ jobs:
             echo "A newer commit exists. Refusing to publish obsolete installers."
             exit 1
           fi
+          (cd dist && sha256sum -c SHA256SUMS.txt)
           mkdir -p Setup/Windows Setup/macOS Setup/Linux
           unzip -q dist/Clientora-Komplett.zip -d extracted
           cp extracted/Clientora/Setup/Windows/Clientora-Setup-Windows-x64.exe Setup/Windows/
@@ -151,6 +143,7 @@ jobs:
             git push origin HEAD:main
           fi
       - name: Publish versioned test distribution
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
