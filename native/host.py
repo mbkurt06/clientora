@@ -25,7 +25,7 @@ def resolve_folder(config, message):
         raise ValueError("Invalid folder marker")
     parts = message.get("parts")
     if (not isinstance(parts, list) or not 2 <= len(parts) <= 64
-            or parts[0] != "Musteriler" or not all(safe_component(p) for p in parts)):
+            or parts[0] not in ("Kunden", "Musteriler") or not all(safe_component(p) for p in parts)):
         raise ValueError("Invalid client folder")
     root = Path(config["root"]).resolve(strict=True)
     mark = (root / MARKER).resolve(strict=True)
@@ -34,7 +34,7 @@ def resolve_folder(config, message):
     if mark.read_text(encoding="utf-8").strip() != marker:
         raise ValueError("Wrong data folder; rerun native/install.py")
     # Reject directory aliases/symlinks that lead out of the selected client.
-    clients = (root / "Musteriler").resolve(strict=True)
+    clients = (root / parts[0]).resolve(strict=True)
     if clients.parent != root:
         raise ValueError("Client directory escapes root")
     client = (clients / parts[1]).resolve(strict=True)

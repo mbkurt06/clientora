@@ -1,84 +1,26 @@
-# Clientora v0.1.8 — local-first Chrome extension
+# Clientora v0.1.9 – Lokale Kundenverwaltung
 
-**Deneysel ilk sürüm.** Gerçek veya hassas müşteri verisi girmeden önce sahte verilerle test edin. Chrome 116+ / güncel Chromium önerilir. Sunucu veya npm kurulumu gerektirmez.
+Clientora ist eine experimentelle Chrome-Erweiterung für Kundenverwaltung, Aufgaben, Termine, Erinnerungen, Dokumente und Browser-Arbeitsbereiche. Vor dem Einsatz mit echten Kundendaten bitte mit fiktiven Daten testen.
 
-## Kurulum / Installation / Installation
+## Installation und Aktualisierung
 
-1. ZIP arşivini açın. `manifest.json` dosyasının bulunduğu `clientora` klasörünü bulun.
-2. Chrome'da `chrome://extensions` adresini açın.
-3. Geliştirici modunu (Entwicklermodus / Developer mode) etkinleştirin.
-4. Paketlenmemiş öğe yükle (Entpackte Erweiterung laden / Load unpacked) ile klasörü seçin.
-5. Araç çubuğuna Clientora simgesini sabitleyin. Simgeye tıklayın; müşteri penceresinde simge sağ paneli açmayı dener. Alt+Shift+C ana sayfayı açar.
-6. Ayarlar > Belgeler ile yerel ana klasörün üst dizinini seçin. Clientora alt klasörünü kendisi oluşturur. Klasör erişimini gerektiğinde yeniden verin.
+1. Repository herunterladen oder mit `git pull origin main` aktualisieren.
+2. `chrome://extensions` öffnen, Entwicklermodus aktivieren, den Ordner mit manifest.json als entpackte Erweiterung laden bzw. die bestehende Erweiterung aktualisieren. Nicht deinstallieren, da lokale Metadaten verloren gehen können.
+3. Clientora öffnen, einen lokalen Speicherordner auswählen und bei Bedarf eine verschlüsselte Sicherung einrichten.
 
-## v0.1.8 — Tek varsayılan belge klasörü
-- Yeni müşteri için yalnızca `Dokumente` otomatik oluşturulur. Yeni demo belgeleri de burada yer alır. Dosya sekmesi doğrudan Dokumente içinde açılır; ev simgesiyle müşteri kök klasörüne gidilebilir. Yükleme ve sürükle-bırak, seçili alt klasörü kullanır; kökteyken Dokumente kullanılır.
-- Clientora sağ tıklama indirmeleri, mevcut göreli indirme ayarı doğruysa Dokumente klasörüne yönlendirilir. Sıradan Chrome indirmeleri henüz otomatik eşleştirilemez.
-- Yeni hazır şablonlar ek klasör oluşturmaz; kullanıcı tanımlı şablon klasörleri ve daha önce kaydedilmiş şablon tanımları korunur. Şablon boş belgeleri gerektiğinde Dokumente/Sablonlar/<şablon-id> altına kopyalanır.
-- Eski klasörler ve belgeler silinmez, taşınmaz veya yeniden adlandırılmaz. Dosya klasörünün gerçek adı dil değişse bile sabit kalır. Yeni sürüm eski demo belgelerini yeniden üretmez.
+## Version 0.1.9
 
-## v0.1.7 — Dosya yöneticisi
-- Belgeler sekmesindeki Im Dateimanager öffnen düğmesi görüntülenen müşteri klasörünü veya alt klasörünü; klasörün üç nokta menüsü o klasörü işletim sisteminin dosya yöneticisinde açar.
-- Chrome tek başına yerel dosya yöneticisini açamadığı için isteğe bağlı Native Messaging köprüsü gerekir. Eklentinin diğer özellikleri bundan bağımsızdır. Python 3 ve Google Chrome gerekir. Terminal'de repo klasöründe macOS/Linux için `python3 native/install.py`, Windows için `py -3 native/install.py` çalıştırılır. Eklenti ID'si chrome://extensions veya hata penceresinden alınır. Mevcut Clientora VERİ klasörü seçilir (kaynak kod klasörü değil). macOS'ta klasör seçme penceresi açılır; diğer sistemlerde mutlak yol girilir. Yönetici yetkisi ve ağ bağlantısı gerekmez. İsteğe bağlı Chrome izni ilk kullanımda sorulur.
-- Köprü yalnızca seçilen Clientora kökü altındaki müşteri klasörlerini açar; kök eşleşmesi için `.clientora-filemanager-id` kullanılır. Dosya çalıştırmaz, ağ kullanmaz. Veri klasörü veya eklenti ID'si değişirse kurulum komutu yeniden çalıştırılır. Windows/Linux ve gerçek Chrome entegrasyonu ayrıca test edilmelidir.
-- Test: `python3 native/test_host.py` (yol sınırları, protokol).
+- Deutsch ist die Standardsprache; Englisch und Türkisch sind in den Einstellungen wählbar. Bereits ausdrücklich gewählte Sprachen bleiben erhalten. Automatische Sprachauswahl ist weiterhin möglich.
+- Demokunden, Aufgaben, Notizen, Termine, Erinnerungen, Vorlagen und neue Musterdateien sind deutsch. Bestehende Demodatensätze werden anhand bekannter Beispieltexte übersetzt; echte Kundendaten bleiben unverändert. Bestehende Dateien werden nicht überschrieben. Neue deutsche MUSTER-Dateien werden zusätzlich im Dokumente-Ordner erstellt.
+- Neue Datenordner: Clientora/Kunden, Clientora/Sicherungen, Clientora/Vorlagen. Bestehende türkisch benannte Ordner bleiben auf der Festplatte erhalten und werden weiterverwendet. Alte Unterordner werden in Clientora mit deutschen Anzeigenamen dargestellt. Vorhandene Kundenordner behalten ihre physischen Namen.
+- Bei neuen deutschen Datenordnern muss der optionale Dateimanager-Helfer aktualisiert werden.
 
-## v0.1.6 — Dialog kapatma ve varsayılan alanlar
-- Dialog dışına tıklama ile kapatma; Escape ve Vazgeç desteği. Kaydetme devam ederken yanlışlıkla kapatma engellenir.
-- İlk altı hazır ek alan da düzenlenebilir varsayılan alan tanımlarına taşındı. Üç nokta menüsünden veya Ayarlar > Standard-Kundenfelder bölümünden varsayılan ekleme/çıkarma. Mevcut müşterilerin değerleri ve şablonlar korunur. Müşteriden alan silme ayrı işlemdir; yeni müşteriye yalnız etkin varsayılanlar eklenir.
+## Funktionen und Grenzen
 
-## v0.1.5 — Kompakt müşteri bilgileri ve arşiv
-- Müşteri bilgileri sola hizalandı. Ek alanlar doğrudan düzenlenebilir, toplu kaydetme ve üç nokta menüsü ile varsayılan/şablon/silme seçenekleri kompaktlaştırıldı.
-- Danışmanlık bitince müşteri arşivlenir, fiziksel dosyalar ve metadata korunur. Arşiv tarihi tutulur; liste filtresinden arşiv açılabilir ve müşteri yeniden etkinleştirilebilir. Arama arşivdekileri de kapsar (favori/arşiv filtresi hariç). Aktif genel bakış ve bildirimler arşivdeki müşterileri içermez. Önceki müşteri çöp kutusu kayıtları geri yüklenebilir.
-- Arşivlenmiş müşteri tekrar etkinleştirildiğinde tamamlandı durumundaysa aktif olarak işaretlenir, diğer durumlar ve görevler korunur.
-
-## v0.1.4 — Müşteri bilgi sayfası ve şablonlar
-- Kundeninformationen sekmesinde temel bilgiler ve ek alanlar (metin, tarih, sayı, e-posta, telefon, URL, uzun metin). Alan tanımı varsayılan olarak gelecekteki müşteriler için kaydedilebilir; kişisel değerler kopyalanmaz.
-- Vorlagen menüsünde Jobcenter, Arbeitssuche, Wohnungssuche, Aufenthaltstitel örnekleri. Kullanıcı yeni şablon oluşturabilir, alan, evrak listesi, görev, web sitesi, klasör ve genel boş belge ekleyebilir. Liste örnektir; resmi gereklilik değildir.
-- Şablon mevcut müşteriye de uygulanır; mevcut alan değerleri ve görev durumları korunur, aynı kayıtlar yinelenmez. Birden fazla şablon uygulanabilir. Değişiklikler mevcut müşterilere otomatik dağıtılmaz; şablonu yeniden uygulayın.
-- Alan, görev, web sitesi, evrak ve dosya menülerinden şablona ekleme. Chrome'da web sayfasına veya bağlantıya sağ tıklayıp Clientora: Sayfayı şablona ekle seçilebilir; URL sorgu parametreleri ve fragment varsayılan olarak kaldırılır, kullanıcı başlık ve adresi kontrol eder. Dosya için varsayılan yalnızca kontrol listesi girdisidir; kişisel veri içermeyen boş şablon dosyası açık onayla Sablonlar dizinine kopyalanabilir. Uygulamada 06_Diger/Sablonlar/<şablon-id> altında kopyalanır. İzin yoksa sonraki klasör erişiminde denenir; mevcut dosyanın üzerine yazılmaz. Şablon dosyalarını da ayrıca yedekleyin.
-- Önceki şablonlar ve yedekler okunur. Tarayıcı ve gerçek dosya izinleriyle ayrıca test edilmelidir.
-
-## v0.1.3 — Adres, klasör kurulumu, otomatik yedek
-- Müşteri kaydı ve düzenleme ekranına sokak/bina, posta kodu, şehir, ülke alanları; arama ve müşteri genel görünümüne adres eklendi.
-- İlk ana sayfada klasör seçimi yönlendirmesi. Klasör izni IndexedDB ile hatırlanır; izin düşerse yeniden bağlantı istenir. Seçilen yerel veya eşitlenen dizin altında Clientora oluşturulur. Klasör değişimi mevcut dosyaları taşımaz; indirme diziniyle eşleşme ayarı sıfırlanır.
-- Ayarlar > Otomatik şifreli yedekleme: kullanıcı ayrı bir parola belirler. PBKDF2 (600.000 SHA-256 iterasyon), AES-GCM 256 bit, rastgele IV; dışarı aktarılamayan şifreleme anahtarı yalnız Chrome profilinin IndexedDB alanında tutulur, parola yazılmaz. Mevcut içe aktarma işlevi ve parola ile yedek açılır. Chrome çalışırken ve izin varken değişen metadata yaklaşık dakikada bir Yedekler dizinine yazılır; cihaz başına günlük anlık görüntü güncellenir, önceki günler silinmez. Son başarılı yedek ve hata durumu ayarlarda gösterilir.
-- OneDrive, Google Drive veya Dropbox masaüstü eşitlemesi kullanıcının sorumluluğundadır. Clientora doğrudan bulut API kullanmaz. Belgeler normal dosyalardır ve ayrıca şifrelenmez. Aynı klasörde eşzamanlı birden çok Clientora kurulumu desteklenmez; yeni bilgisayarda yedek içe aktarılmalıdır. Bulut eşitleme tek başına kesin veri kurtarma garantisi değildir.
-- Gerçek Chrome, işletim sistemi, klasör izni ve eşitleme testleri gereklidir.
-
-## v0.1.2 — Demo verileri
-- Boş kurulumda otomatik 5 kurgusal müşteri, her birinde 5 web sitesi, 5 görev, 3 not, 2 randevu ve 2 hatırlatma. Gerçek başvuru veya hesap yoktur.
-- Ayarlar > Belgeler bölümünde bir üst klasör seçildiğinde 5 müşteri klasörü ve standart alt klasörler, örnek PDF/TXT/CSV belgeleriyle oluşturulur. macOS, Windows, Linux için aynı Chrome klasör seçicisi kullanılır; sabit OS yolu yoktur.
-- Mevcut kayıtlar değiştirilmez. Ayarlar > Örnek veriler üzerinden kurgusal müşteri eklenebilir; aynı demo seti iki kez eklenmez. Örnek dosyaların üzerine yazılmaz. Belge erişimi kullanıcı izni gerektirir.
-- Demo verileri gerçek web sitelerinin genel giriş sayfalarını kullanır; gerçek hesap, parola veya başvuru içermez. Randevular gerçek rezervasyon değildir. Demo içerikleri ağırlıklı İngilizce/Almancadır.
-
-## v0.1.1
-- Ana sayfada kompakt istatistikler ve varsayılan Bugün ajandası (randevu, görev, hatırlatma, geciken görev).
-- Bugün / 7 gün / hafta / ay / kapalı seçenekleri kalıcı ayar olarak kaydedilir; tam Takvim sekmesi bağımsızdır.
-- Güncellemek için mevcut eklenti klasöründeki dosyaları değiştirin ve chrome://extensions sayfasından Yenile düğmesine basın. Eklentiyi kaldırmayın.
-
-## İşlevler
-- Tam sayfa yönetim merkezi, müşteri detay sayfası, müşteriye özgü Chrome penceresi ve sağ panel.
-- Müşteri bilgileri, renkler, favori, durum, etiket, arşiv, çöp kutusu, notlar, görevler ve tarihli randevular; genel ve müşteri takvimi.
-- Tekrarlı hatırlatma, bildirim, bir saat erteleme; Chrome açıkken dakikalık kontrol. Chrome kapalıyken bildirim garanti değildir. Yeniden açıldığında bekleyen hatırlatmalar kontrol edilir.
-- Web sitesi listeleri, son sekme URL'lerini saklama, müşteri şablonları (görevler, siteler, alt klasörler), işlem geçmişi. Son sekmeler yeniden açılabilir, ancak Chrome geçmişi veya oturum çerezleri müşteri bazında ayrılmaz.
-- Türkçe, Almanca, İngilizce; Chrome UI dili varsayılan, desteklenmezse İngilizce. Sistem teması ve elle seçim. Bazı teknik uyarılar İngilizce kalabilir.
-- Yerel klasörler: `Clientora/Musteriler/000001_Ad_Soyad/` ve standart alt klasörler. Dosya listeleme, yükleme, sürükle-bırak, alt klasör, önizleme (PDF/resim), kopyalama, taşıma, yeniden adlandırma, silme. Diğer dosya türleri indirilerek açılır. Klasör adı sabittir; müşteri adı değişince otomatik yeniden adlandırılmaz. Belge silme kalıcıdır.
-- Parola kasası: PBKDF2-SHA256 600.000 iterasyon, rastgele salt, AES-GCM 256 bit, her kayda rastgele IV, müşteri kimliğine bağlı AAD. Ana parola kaydedilmez, kasa beş dakika sonra kilitlenir. Aktif müşteri ve tam origin eşleşmesi, kullanıcı onayı ve site izni ile tek bir belirgin giriş formuna doldurma. Giriş formu otomatik gönderilmez. Chrome'un kendi parola yöneticisi bağımsızdır.
-- Parolalı metadata dışa aktarma / geri yükleme. Belgeleri ayrıca yedekleyin. Eklentiyi kaldırmak Chrome'daki metadata ve kasa verisini kaybettirebilir; yerel klasörler kalır. Yedek parola ve kasa parolasını kaybetmeyin.
-
-## İndirme yönlendirmesi ve oturum sınırları
-Chrome downloads API, sıradan indirmelerde kaynak sekme/pencere kimliğini vermez ve yalnızca Chrome varsayılan indirme klasörüne göre göreli hedef kabul eder. Bu sürümde **müşteri penceresinde bağlantıya sağ tıklayıp Clientora seçildiğinde** müşteri kesin olarak bilinir. `Clientora` klasörü Chrome'un gerçek indirme dizininin hemen altında ise Ayarlar'daki ilgili kutuyu işaretleyin; otomatik hedef `Clientora/Musteriler/<müşteri>/Dokumente/` olur. Başka bir klasör seçilirse kayıt konumu sorulur. Normal indirmeleri Belgeler > Dosya ekle ile elle aktarın. Chrome indirme klasörüne göre konumu doğrulamadan kutuyu açmayın. Bu sürüm normal tarayıcı indirmelerini otomatik olarak müşteriye atamaz.
-
-**Çerezler, localStorage, IndexedDB ve oturumlar normal Chrome profili içinde ortaktır.** Müşteriye özgü pencere güvenlik izolasyonu değildir. Yanlış hesaba işlem yapmamak için web sitesindeki aktif kullanıcıyı mutlaka kontrol edin. Aynı siteye farklı müşterilerle eşzamanlı giriş için ayrı Chrome profilleri kullanın. Eklenti, farklı müşterilere parola önerisini kendi kasasında ayrı tutar. Parola doldurma yalnızca sağ panelden açık kullanıcı eylemiyle yapılır. Otomatik panel açma Chrome kullanıcı etkileşimi kısıtına takılabilir; araç çubuğu simgesinden açın. Tarayıcı yeniden başlarsa müşteri penceresi eşlemesini yeniden oluşturmak için müşteri detayından çalışma alanını açın.
-
-## Test durumu
-- `node --check` tüm JS dosyalarında geçer; manifest JSON geçerli.
-- `node tests/smoke.cjs` müşteri kayıtlarının ayrılması, görev durumu, kasa şifreleme/çözme, yanlış müşteri kimliği ile çözmenin reddi, tekrar eden hatırlatma hesaplaması.
-- Gerçek Chrome'da uzantı yükleme, dosya izinleri, şifre doldurma, bildirimler ve indirme akışı ayrıca denenmeli. Güvenlik denetimi yapılmamıştır; üretim kullanımı için hazır değildir.
-- Eksikler: normal indirme otomasyonu, tam oturum izolasyonu, otomatik zamanlanmış şifreli yedekleme, bütün belgelerde global arama, not şablonları, bağımsız başvuru kaydı, yerel uygulamayla doğrudan açma, tam çeviri, tüm geçmişin yakalanması, görev-belge ilişkilendirme. Dosyaları tamamen yerel tutan bu MVP bunları henüz sağlamaz.
-
-## English / Deutsch
-Load this directory as an unpacked extension in `chrome://extensions`. Use dummy data for testing. Client records and credentials are local; cookies and website sessions are shared within the Chrome profile. Standard downloads cannot reliably be assigned to a client. See the Turkish instructions above for the context-menu download workflow and security limitations.
-
-Diesen Ordner in `chrome://extensions` als entpackte Erweiterung laden. Nur Testdaten verwenden. Kundendaten und Passworttresor sind lokal; Cookies und Webseiten-Sitzungen sind innerhalb eines Chrome-Profils gemeinsam. Normale Downloads können nicht zuverlässig einem Kunden zugeordnet werden. Siehe die Hinweise oben zur Download-Funktion und Sicherheit.
+- Kundenübersicht, Archivierung und Reaktivierung, individuelle Felder, wiederverwendbare Vorlagen, Dokumenten-Checklisten, Notizen, Aufgaben, Kalender, Erinnerungen.
+- Lokale Dateien und Ordner, standardmäßig Dokumente. Frei wählbare Unterordner. Browser-Downloads lassen sich nur bei sicher zugeordneten Clientora-Linkdownloads und korrekt gesetztem Downloadpfad automatisch zuordnen; normale Downloads müssen manuell zugeordnet werden.
+- Getrennte Browserfenster sind keine getrennten Chrome-Profile. Cookies und Websitzungen werden geteilt. Vor jeder Anmeldung das Konto prüfen.
+- Passworttresor und Metadaten-Sicherung verwenden PBKDF2 und AES-GCM. Dokumente werden nicht separat verschlüsselt. Ordner und Sicherungen können über einen lokal synchronisierten Cloud-Ordner gesichert werden; Clientora nutzt keine Cloud-API. Gleichzeitiger Betrieb mehrerer Installationen mit einem Datenbestand wird nicht unterstützt.
+- Optionale automatische verschlüsselte Sicherung, wenn Chrome läuft und Ordnerzugriff besteht. Passwörter sicher aufbewahren. Erinnerungen können bei geschlossenem Chrome verspätet erscheinen.
+- Optionaler Dateimanager-Helfer: macOS/Linux `python3 native/install.py`, Windows `py -3 native/install.py`. Erweiterungs-ID und Clientora-Datenordner angeben. Keine Administratorrechte oder Netzwerkverbindung erforderlich. Nur für das Öffnen von Kundenordnern nötig.
+- Echte Chrome-Integration, Betriebssysteme, Dateiberechtigungen und Datenschutz/Sicherheit müssen vor produktivem Einsatz geprüft werden.

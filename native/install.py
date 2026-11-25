@@ -30,9 +30,11 @@ def main():
     if not re.fullmatch(r"[a-p]{32}", extension_id):
         raise SystemExit("Invalid Chrome extension ID (32 letters a-p).")
     root = Path(args.root or choose_root()).expanduser().resolve(strict=True)
-    if not (root / "Musteriler").is_dir() and (root / "Clientora" / "Musteriler").is_dir():
+    def has_clients(p):
+        return any((p / name).is_dir() for name in ("Kunden", "Musteriler"))
+    if not has_clients(root) and has_clients(root / "Clientora"):
         root = (root / "Clientora").resolve(strict=True)
-    if root.name != "Clientora" or not (root / "Musteriler").is_dir():
+    if root.name != "Clientora" or not has_clients(root):
         raise SystemExit("Select the Clientora data folder created in the extension, not the source repository.")
     home = Path.home()
     if sys.platform == "darwin":

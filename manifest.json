@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Clientora",
-  "version": "0.1.8",
-  "description": "Local client workspaces and case management",
+  "version": "0.1.9",
+  "description": "Lokale Kundenverwaltung und Browser-Arbeitsbereiche",
   "minimum_chrome_version": "116",
   "permissions": [
     "storage",
@@ -36,7 +36,7 @@
       "suggested_key": {
         "default": "Alt+Shift+C"
       },
-      "description": "Open Clientora"
+      "description": "Clientora öffnen"
     }
   },
   "optional_permissions": [
