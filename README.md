@@ -1,4 +1,4 @@
-# Clientora v0.1.3 — local-first Chrome extension
+# Clientora v0.1.4 — local-first Chrome extension
 
 **Deneysel ilk sürüm.** Gerçek veya hassas müşteri verisi girmeden önce sahte verilerle test edin. Chrome 116+ / güncel Chromium önerilir. Sunucu veya npm kurulumu gerektirmez.
 
@@ -10,6 +10,13 @@
 4. Paketlenmemiş öğe yükle (Entpackte Erweiterung laden / Load unpacked) ile klasörü seçin.
 5. Araç çubuğuna Clientora simgesini sabitleyin. Simgeye tıklayın; müşteri penceresinde simge sağ paneli açmayı dener. Alt+Shift+C ana sayfayı açar.
 6. Ayarlar > Belgeler ile yerel ana klasörün üst dizinini seçin. Clientora alt klasörünü kendisi oluşturur. Klasör erişimini gerektiğinde yeniden verin.
+
+## v0.1.4 — Müşteri bilgi sayfası ve şablonlar
+- Kundeninformationen sekmesinde temel bilgiler ve ek alanlar (metin, tarih, sayı, e-posta, telefon, URL, uzun metin). Alan tanımı varsayılan olarak gelecekteki müşteriler için kaydedilebilir; kişisel değerler kopyalanmaz.
+- Vorlagen menüsünde Jobcenter, Arbeitssuche, Wohnungssuche, Aufenthaltstitel örnekleri. Kullanıcı yeni şablon oluşturabilir, alan, evrak listesi, görev, web sitesi, klasör ve genel boş belge ekleyebilir. Liste örnektir; resmi gereklilik değildir.
+- Şablon mevcut müşteriye de uygulanır; mevcut alan değerleri ve görev durumları korunur, aynı kayıtlar yinelenmez. Birden fazla şablon uygulanabilir. Değişiklikler mevcut müşterilere otomatik dağıtılmaz; şablonu yeniden uygulayın.
+- Alan, görev, web sitesi, evrak ve dosya menülerinden şablona ekleme. Dosya için varsayılan yalnızca kontrol listesi girdisidir; kişisel veri içermeyen boş şablon dosyası açık onayla Sablonlar dizinine kopyalanabilir. Uygulamada 06_Diger/Sablonlar/<şablon-id> altında kopyalanır. İzin yoksa sonraki klasör erişiminde denenir; mevcut dosyanın üzerine yazılmaz. Şablon dosyalarını da ayrıca yedekleyin.
+- Önceki şablonlar ve yedekler okunur. Tarayıcı ve gerçek dosya izinleriyle ayrıca test edilmelidir.
 
 ## v0.1.3 — Adres, klasör kurulumu, otomatik yedek
 - Müşteri kaydı ve düzenleme ekranına sokak/bina, posta kodu, şehir, ülke alanları; arama ve müşteri genel görünümüne adres eklendi.
